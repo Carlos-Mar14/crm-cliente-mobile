@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TextInput, Button } from "react-native";
-import { Icon } from "react-native-elements";
-import { WebView } from 'react-native-webview';
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Icon, Input, Button } from "react-native-elements";
+import { isEmpty } from "lodash";
+import axios from "axios";
 
 import { useNavigation } from "@react-navigation/native";
-import { validateEmail, isEmpty } from "../../utils/helpers";
+import { validateEmail } from "../../utils/helpers";
 
 export default function LoginForm() {
-  // Estado para mostrar u ocultar la contraseña
+  const API_URL = "https://crm.gestiongroup.es/api/token-auth/";
+
+  //Estado para mostrar u ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false);
 
-  // Estado para guardar la data del formulario de RegisterForm
+  //Estado para guardar la data del formulario de RegisterForm
   const [formData, setFormData] = useState(defaultFormValues());
 
-  // Validaciones para cada campo
+  //Validaciones para cada campo
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
 
-  // Constante para usar la importanción de la navegación
+  //Constante para usar la importanción de la navegación
   const navigation = useNavigation();
 
   const onChange = (e, type) => {
@@ -29,47 +32,19 @@ export default function LoginForm() {
       return;
     }
 
-    const { email, password } = formData;
+    try {
+      const { email, password } = formData;
+      const response = await axios.post(API_URL, { email, password });
 
-    // **Integración con react-native-webview:**
-
-    // Crear referencia al componente WebView
-    const webViewRef = useRef(null);
-
-    // Función para enviar la petición POST
-    const sendPostRequest = () => {
-      const data = JSON.stringify({ email, password });
-      webViewRef.current.injectJavaScript(`
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://crm.gestiongroup.es/api/token-refresh/');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(${data});
-      `);
-    };
-
-    // Mostrar WebView y enviar la petición
-    return (
-      <WebView
-        ref={webViewRef}
-        source={{ uri: "https://www.paginawebdelaempresa.com/login" }}
-        onMessage={(event) => {
-          const data = JSON.parse(event.nativeEvent.data);
-          // Procesar la respuesta de la petición POST (token de acceso)
-          if (data.success) {
-            // Almacenar el token de acceso
-            // Navegar a la pantalla "account"
-            navigation.navigate("account");
-          } else {
-            // Mostrar mensaje de error
-            alert("Usuario o contraseña incorrectos.");
-          }
-        }}
-      />
-    );
-
-    // **Fin de la integración con react-native-webview:**
+      // Navegar a la siguiente pantalla
+      //navigation.navigate("account");
+    } catch (error) {
+      // Manejar el error
+      console.error(error);
+      // Mostrar un mensaje de error al usuario
+      // ...
+    }
   };
-
   const validateData = () => {
     setErrorEmail("");
     setErrorPassword("");
@@ -90,7 +65,7 @@ export default function LoginForm() {
 
   return (
     <View style={styles.input}>
-      <TextInput
+      <Input
         containerStyle={styles.input}
         placeholder="Ingresa tu email"
         onChange={(e) => onChange(e, "email")}
@@ -98,7 +73,7 @@ export default function LoginForm() {
         errorMessage={errorEmail}
         defaultValue={formData.email}
       />
-      <TextInput
+      <Input
         containerStyle={styles.input}
         placeholder="Ingresa tu contraseña"
         password={true}
@@ -121,6 +96,7 @@ export default function LoginForm() {
         buttonStyle={[styles.btn, styles.btnText]}
         onPress={() => doLogin()}
       />
+      {/* <Loading isVisible={loading} text="Iniciando Sesión..." /> */}
     </View>
   );
 }
