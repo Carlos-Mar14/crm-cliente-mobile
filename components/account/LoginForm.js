@@ -4,7 +4,6 @@ import { Icon, Input, Button } from "react-native-elements";
 import { isEmpty } from "lodash";
 import axios from "axios";
 
-
 import { useNavigation } from "@react-navigation/native";
 import { validateEmail } from "../../utils/helpers";
 import { API_URL } from "../../utils/accions";
@@ -31,6 +30,14 @@ export default function LoginForm() {
     if (!validateData()) {
       return;
     }
+
+    const handleEmailChange = (text) => {
+      setEmail(text);
+    };
+
+    const handlePasswordChange = (text) => {
+      setPassword(text);
+    };
 
     try {
       const { email, password } = formData;
@@ -75,6 +82,8 @@ export default function LoginForm() {
       <View style={styles.inputContainer}>
         <Input
           containerStyle={styles.input}
+          //value={email}
+          //onChangeText={handleEmailChange}
           placeholder="Correo Electrónico"
           onChange={(e) => onChange(e, "email")}
           keyboardType="email-address"
@@ -84,6 +93,8 @@ export default function LoginForm() {
         <Input
           containerStyle={styles.input}
           placeholder="Contraseña"
+          //value={password}
+          //onChangeText={handlePasswordChange}
           password={true}
           secureTextEntry={!showPassword}
           onChange={(e) => onChange(e, "password")}
@@ -128,7 +139,7 @@ const styles = StyleSheet.create({
     marginLeft: 100,
     width: 130,
   },
-  inputContainer:{
+  inputContainer: {
     marginBottom: 100,
   },
 });

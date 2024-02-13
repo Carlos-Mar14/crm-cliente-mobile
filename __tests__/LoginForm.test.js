@@ -1,7 +1,10 @@
 import { NavigationContainer } from "@react-navigation/native";
+import axios from "axios";
 import { fireEvent, render } from "@testing-library/react-native";
 import React from "react";
 import LoginForm from "../components/account/LoginForm";
+
+jest.mock("axios");
 
 const setup = () => {
   const utils = render(
@@ -19,91 +22,87 @@ const setup = () => {
     passwordInput,
     loginButton,
     ...utils,
-  }
-}
+  };
+};
 
-describe('LoginForm', () => {
+describe("LoginForm", () => {
+  // Renders the login form with email and password inputs and a login button
+  it("should render the login form with email and password inputs and a login button", () => {
+    const { emailInput, passwordInput, loginButton } = setup();
 
-    // Renders the login form with email and password inputs and a login button
-    it('should render the login form with email and password inputs and a login button', () => {
-      const { emailInput, passwordInput, loginButton } = setup();
+    expect(emailInput).toBeTruthy();
+    expect(passwordInput).toBeTruthy();
+    expect(loginButton).toBeTruthy();
+  });
 
-      expect(emailInput).toBeTruthy();
-      expect(passwordInput).toBeTruthy();
-      expect(loginButton).toBeTruthy();
-    });
+  // Allows the user to input their email and password
+  it("should allow the user to input their email and password", () => {
+    const { emailInput, passwordInput } = setup();
 
-    // Allows the user to input their email and password
-    it('should allow the user to input their email and password', () => {
-      const { emailInput, passwordInput } = setup();
+    fireEvent.changeText(emailInput, "test@example.com");
+    fireEvent.changeText(passwordInput, "password123");
 
-      fireEvent.changeText(emailInput, "test@example.com");
-      fireEvent.changeText(passwordInput, "password123");
+    expect(emailInput.props.value).toBe("test@example.com");
+    expect(passwordInput.props.value).toBe("password123");
+  });
 
-      expect(emailInput.props.value).toBe("test@example.com");
-      expect(passwordInput.props.value).toBe("password123");
-    });
+  // Validates the email and password inputs
+  it("should validate the email and password inputs", () => {
+    const { emailInput, passwordInput, loginButton, getByText } = setup();
 
-    // Validates the email and password inputs
-    it('should validate the email and password inputs', () => {
-      const { emailInput, passwordInput, loginButton, getByText } = setup();
+    fireEvent.changeText(emailInput, "invalidemail");
+    fireEvent.changeText(passwordInput, "");
 
-      fireEvent.changeText(emailInput, "invalidemail");
-      fireEvent.changeText(passwordInput, "");
+    fireEvent.press(loginButton);
 
-      fireEvent.press(loginButton);
+    const emailError = getByText("Debes de ingresar un email válido.");
+    const passwordError = getByText("Debes de ingresar tu contraseña.");
 
-      const emailError = getByText("Debes de ingresar un email válido.");
-      const passwordError = getByText("Debes de ingresar tu contraseña.");
+    expect(emailError).toBeTruthy();
+    expect(passwordError).toBeTruthy();
+  });
 
-      expect(emailError).toBeTruthy();
-      expect(passwordError).toBeTruthy();
-    });
+  // Displays an error message if the login request fails
+  it("should display an error message if the login request fails", async () => {
+    const { emailInput, passwordInput, loginButton, getByText } = setup();
 
-    // Displays an error message if the login request fails
-    it('should display an error message if the login request fails', async () => {
-      axios.post.mockRejectedValueOnce(new Error("Login failed"));
+    fireEvent.changeText(emailInput, "test@example.com");
+    fireEvent.changeText(passwordInput, "password123");
 
-      const { emailInput, passwordInput, loginButton, getByText } = setup();
+    fireEvent.press(loginButton);
 
-      fireEvent.changeText(emailInput, "test@example.com");
-      fireEvent.changeText(passwordInput, "password123");
+    const errorMessage = getByText("Login failed");
 
-      await fireEvent.press(loginButton);
+    expect(errorMessage).toBeTruthy();
+  });
 
-      const errorMessage = getByText("Login failed");
+  // Does not allow the user to submit the form if the email or password inputs are empty
+  it("should not allow the user to submit the form if the email or password inputs are empty", () => {
+    const { emailInput, passwordInput, loginButton, getByText } = setup();
 
-      expect(errorMessage).toBeTruthy();
-    });
+    fireEvent.changeText(emailInput, "");
+    fireEvent.changeText(passwordInput, "");
 
-    // Does not allow the user to submit the form if the email or password inputs are empty
-    it('should not allow the user to submit the form if the email or password inputs are empty', () => {
-      const { emailInput, passwordInput, loginButton, getByText } = setup();
+    fireEvent.press(loginButton);
 
-      fireEvent.changeText(emailInput, "");
-      fireEvent.changeText(passwordInput, "");
+    const emailError = getByText("Debes de ingresar un email válido.");
+    const passwordError = getByText("Debes de ingresar tu contraseña.");
 
-      fireEvent.press(loginButton);
+    expect(emailError).toBeTruthy();
+    expect(passwordError).toBeTruthy();
+  });
 
-      const emailError = getByText("Debes de ingresar un email válido.");
-      const passwordError = getByText("Debes de ingresar tu contraseña.");
+  // Does not allow the user to submit the form if the email input is not a valid email address
+  it("should not allow the user to submit the form if the email input is not a valid email address", () => {
+    const { emailInput, passwordInput, loginButton, getByText } = setup();
 
-      expect(emailError).toBeTruthy();
-      expect(passwordError).toBeTruthy();
-    });
+    fireEvent.changeText(emailInput, "invalidemail");
+    fireEvent.changeText(passwordInput, "password123");
 
-    // Does not allow the user to submit the form if the email input is not a valid email address
-    it('should not allow the user to submit the form if the email input is not a valid email address', () => {
-      const { emailInput, passwordInput, loginButton, getByText } = setup();
+    fireEvent.press(loginButton);
 
-      fireEvent.changeText(emailInput, "invalidemail");
-      fireEvent.changeText(passwordInput, "password123");
+    const emailError = getByText("Debes de ingresar un email válido.");
 
-      fireEvent.press(loginButton);
-
-      const emailError = getByText("Debes de ingresar un email válido.");
-
-      expect(emailError).toBeTruthy();
-    });
+    expect(emailError).toBeTruthy();
+  });
 });
-
