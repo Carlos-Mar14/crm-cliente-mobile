@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 import { Icon, Input, Button } from "react-native-elements";
 import { isEmpty } from "lodash";
 import axios from "axios";
 
+
 import { useNavigation } from "@react-navigation/native";
 import { validateEmail } from "../../utils/helpers";
+import { API_URL } from "../../utils/accions";
 
 export default function LoginForm() {
-  const API_URL = "https://crm.gestiongroup.es/api/token-auth/";
-
   //Estado para mostrar u ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false);
 
@@ -64,39 +64,47 @@ export default function LoginForm() {
   };
 
   return (
-    <View style={styles.input}>
-      <Input
-        containerStyle={styles.input}
-        placeholder="Ingresa tu email"
-        onChange={(e) => onChange(e, "email")}
-        keyboardType="email-address"
-        errorMessage={errorEmail}
-        defaultValue={formData.email}
-      />
-      <Input
-        containerStyle={styles.input}
-        placeholder="Ingresa tu contraseña"
-        password={true}
-        secureTextEntry={!showPassword}
-        onChange={(e) => onChange(e, "password")}
-        errorMessage={errorPassword}
-        defaultValue={formData.password}
-        rightIcon={
-          <Icon
-            type="material-community"
-            name={showPassword ? "eye-off-outline" : "eye-outline"}
-            IconStyle={styles.icon}
-            onPress={() => setShowPassword(!showPassword)}
-          />
-        }
-      />
-      <Button
-        title="Iniciar Sesión"
-        containerStyle={styles.btnContainer}
-        buttonStyle={[styles.btn, styles.btnText]}
-        onPress={() => doLogin()}
-      />
-      {/* <Loading isVisible={loading} text="Iniciando Sesión..." /> */}
+    <View style={styles.container}>
+      <View style={styles.image}>
+        <Image
+          style={styles.image}
+          source={{ uri: "https://crm.gestiongroup.es/img/logo.svg" }}
+          resizeMode="contain"
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Input
+          containerStyle={styles.input}
+          placeholder="Correo Electrónico"
+          onChange={(e) => onChange(e, "email")}
+          keyboardType="email-address"
+          errorMessage={errorEmail}
+          defaultValue={formData.email}
+        />
+        <Input
+          containerStyle={styles.input}
+          placeholder="Contraseña"
+          password={true}
+          secureTextEntry={!showPassword}
+          onChange={(e) => onChange(e, "password")}
+          errorMessage={errorPassword}
+          defaultValue={formData.password}
+          rightIcon={
+            <Icon
+              type="material-community"
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              IconStyle={styles.icon}
+              onPress={() => setShowPassword(!showPassword)}
+            />
+          }
+        />
+        <Button
+          title="Iniciar Sesión"
+          containerStyle={styles.btnContainer}
+          buttonStyle={[styles.btn, styles.btnText]}
+          onPress={() => doLogin()}
+        />
+      </View>
     </View>
   );
 }
@@ -108,27 +116,19 @@ const defaultFormValues = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 30,
+    marginBottom: 100,
   },
-  input: {
-    width: "100%",
-  },
-  btnContainer: {
-    marginTop: 20,
-    width: "85%",
+  image: {
+    width: 350,
+    height: 350,
+    marginTop: 50,
   },
   btn: {
     backgroundColor: "#c1c1c1",
-    marginLeft: 57,
-    width: "60%",
+    marginLeft: 100,
+    width: 130,
   },
-  //   icon: {
-  //     color: "#c1c1c1",
-  //   },
-  btnText: {
-    color: "#000000",
+  inputContainer:{
+    marginBottom: 100,
   },
 });

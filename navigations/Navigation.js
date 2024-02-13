@@ -11,37 +11,36 @@ import AccountStack from "./AccountStack";
 const Tab = createBottomTabNavigator();
 
 export default function Navigation() {
-    const screenOptions = (route, color) => {
-      let iconName;
-      switch (route.name) {
-        case "Cuentas":
-          iconName = "account";
-          break;
-      }
-  
-      return (
-        <Icon type="material-community" name={iconName} size={30} color={color} />
-      );
-    };
-  
+  const screenOptions = (route, color) => {
+    let iconName;
+    switch (route.name) {
+      case "Cuentas":
+        iconName = "account";
+        break;
+    }
+
     return (
-      //Componente para navegar entre las pantallas en el orden que se desea
-      <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName="Account"
-          screenOptions={({ route }) => ({
-            tabBarInactiveTintColor: "#0464b4",
-            tabBarActiveTintColor: "#fcd304",
-            tabBarIcon: ({ color }) => screenOptions(route, color),
-          })}
-        >
-          <Tab.Screen
-            name="Cuentas"
-            component={AccountStack}
-            options={{ headerTitle: "Cuenta", headerShown: false }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <Icon type="material-community" name={iconName} size={30} color={color} />
     );
-  }
-  
+  };
+
+  return (
+    //Componente para navegar entre las pantallas en el orden que se desea
+    <NavigationContainer>
+      <Tab.Navigator
+        initialRouteName="Account"
+        screenOptions={({ route }) => ({
+          tabBarInactiveTintColor: "#0464b4",
+          tabBarActiveTintColor: "#fcd304",
+          tabBarIcon: ({ color }) => screenOptions(route, color),
+        })}
+      >
+        <Tab.Screen
+          name="Cuentas"
+          component={AccountStack}
+          options={{ headerTitle: "Cuenta", headerShown: false }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
