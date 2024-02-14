@@ -1,10 +1,16 @@
+import mockAxios from "jest-mock-axios";
+
 import { NavigationContainer } from "@react-navigation/native";
 import axios from "axios";
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 import LoginForm from "../components/account/LoginForm";
 
 jest.mock("axios");
+
+jest.mock("axios", () => ({
+  post: jest.fn(() => Promise.reject({ response: { status: 400 } })),
+}));
 
 const setup = () => {
   const utils = render(
@@ -37,13 +43,22 @@ describe("LoginForm", () => {
 
   // Allows the user to input their email and password
   it("should allow the user to input their email and password", () => {
-    const { emailInput, passwordInput } = setup();
+    const onChange = jest.fn();
+
+    const { getByPlaceholderText } = render(
+      <NavigationContainer>
+        <LoginForm onChange={onChange} />
+      </NavigationContainer>
+    );
+
+    const emailInput = getByPlaceholderText("Correo Electrónico");
+    const passwordInput = getByPlaceholderText("Contraseña");
 
     fireEvent.changeText(emailInput, "test@example.com");
     fireEvent.changeText(passwordInput, "password123");
 
-    expect(emailInput.props.value).toBe("test@example.com");
-    expect(passwordInput.props.value).toBe("password123");
+    expect(onChange).toHaveBeenCalledWith("test@example.com");
+    expect(onChange).toHaveBeenCalledWith("password123");
   });
 
   // Validates the email and password inputs
@@ -69,11 +84,14 @@ describe("LoginForm", () => {
     fireEvent.changeText(emailInput, "test@example.com");
     fireEvent.changeText(passwordInput, "password123");
 
+    expect(passwordInput.props.value).toBe("password123");
+
     fireEvent.press(loginButton);
 
-    const errorMessage = getByText("Login failed");
-
-    expect(errorMessage).toBeTruthy();
+    await waitFor(() => {
+      const errorMessage = getByText("Login failed");
+      expect(errorMessage).toBeTruthy();
+    });
   });
 
   // Does not allow the user to submit the form if the email or password inputs are empty

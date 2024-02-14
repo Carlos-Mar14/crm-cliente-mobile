@@ -31,14 +31,6 @@ export default function LoginForm() {
       return;
     }
 
-    const handleEmailChange = (text) => {
-      setEmail(text);
-    };
-
-    const handlePasswordChange = (text) => {
-      setPassword(text);
-    };
-
     try {
       const { email, password } = formData;
       const response = await axios.post(API_URL, { email, password });
@@ -47,9 +39,14 @@ export default function LoginForm() {
       //navigation.navigate("account");
     } catch (error) {
       // Manejar el error
-      console.error(error);
-      // Mostrar un mensaje de error al usuario
-      // ...
+      if (error.response && error.response.status === 400) {
+        // Mensaje de error Credenciales
+        setErrorEmail("Login failed");
+        setErrorPassword("Login failed");
+      } else {
+        // Manejo de otros errores
+        console.error(error);
+      }
     }
   };
   const validateData = () => {
@@ -82,8 +79,6 @@ export default function LoginForm() {
       <View style={styles.inputContainer}>
         <Input
           containerStyle={styles.input}
-          //value={email}
-          //onChangeText={handleEmailChange}
           placeholder="Correo Electrónico"
           onChange={(e) => onChange(e, "email")}
           keyboardType="email-address"
@@ -93,8 +88,6 @@ export default function LoginForm() {
         <Input
           containerStyle={styles.input}
           placeholder="Contraseña"
-          //value={password}
-          //onChangeText={handlePasswordChange}
           password={true}
           secureTextEntry={!showPassword}
           onChange={(e) => onChange(e, "password")}
