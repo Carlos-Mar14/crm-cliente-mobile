@@ -3,10 +3,15 @@ import { StyleSheet, View, Image, Alert } from "react-native";
 import { Icon, Input, Button } from "react-native-elements";
 import { isEmpty } from "lodash";
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
 import { useNavigation } from "@react-navigation/native";
 import { validateEmail } from "../../utils/helpers";
 import { API_URL } from "../../utils/accions";
+
+async function SaveToken(token) {
+  await SecureStore.setItemAsync("token", token);
+}
 
 export default function LoginForm() {
   //Estado para mostrar u ocultar la contraseña
@@ -33,6 +38,7 @@ export default function LoginForm() {
     try {
       const { email, password } = formData;
       const response = await axios.post(API_URL, { email, password });
+      await SaveToken(response.data.token);
     } catch (error) {
       // Manejar el error
       if (error.response && error.response.status === 400) {

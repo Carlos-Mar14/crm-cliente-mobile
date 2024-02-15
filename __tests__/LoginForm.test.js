@@ -8,10 +8,12 @@ import {
 import React from "react";
 import LoginForm from "../components/account/LoginForm";
 
-jest.mock("axios");
+import * as SecureStore from "expo-secure-store";
 
 jest.mock("axios", () => ({
-  post: jest.fn(() => Promise.reject({ response: { status: 400 } })),
+  post: jest.fn(() =>
+    Promise.resolve({ response: { status: 201, data: { token: "testtoken" } } })
+  ),
 }));
 
 const setup = () => {
@@ -126,5 +128,19 @@ describe("LoginForm", () => {
     const emailError = getByText("Debes de ingresar un email válido.");
 
     expect(emailError).toBeTruthy();
+  });
+
+  it("then login request is succesfull, token saved to secure storage", async () => {
+    const { emailInput, passwordInput, loginButton } = setup();
+
+    fireEvent.changeText(emailInput, "test@example.com");
+    fireEvent.changeText(passwordInput, "password123");
+
+    fireEvent.press(loginButton);
+
+    let result = await SecureStore.getItemAsync("token");
+    await waitFor(() => {
+      expect(result).toBe("testtoken");
+    });
   });
 });
