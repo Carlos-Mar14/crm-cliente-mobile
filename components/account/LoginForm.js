@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, Alert } from "react-native";
 import { Icon, Input, Button } from "react-native-elements";
 import { isEmpty } from "lodash";
 import axios from "axios";
@@ -30,28 +30,20 @@ export default function LoginForm() {
     if (!validateData()) {
       return;
     }
-
     try {
       const { email, password } = formData;
       const response = await axios.post(API_URL, { email, password });
-
-      // Navegar a la siguiente pantalla
-      //navigation.navigate("account");
     } catch (error) {
       // Manejar el error
       if (error.response && error.response.status === 400) {
-        // Mensaje de error Credenciales
-        setErrorEmail("Login failed");
-        setErrorPassword("Login failed");
+        Alert.alert("Error", "Credenciales Invalidas");
       } else {
-        // Manejo de otros errores
+        //Manejo de otros errores
         console.error(error);
       }
     }
   };
   const validateData = () => {
-    setErrorEmail("");
-    setErrorPassword("");
     let isValid = true;
 
     if (!validateEmail(formData.email)) {
