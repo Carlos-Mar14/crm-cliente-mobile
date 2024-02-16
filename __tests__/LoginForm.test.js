@@ -6,15 +6,11 @@ import {
   screen,
 } from "@testing-library/react-native";
 import React from "react";
+import * as SecureStore from "expo-secure-store";
 import LoginForm from "../components/account/LoginForm";
 
-import * as SecureStore from "expo-secure-store";
-
-jest.mock("axios", () => ({
-  post: jest.fn(() =>
-    Promise.resolve({ response: { status: 201, data: { token: "testtoken" } } })
-  ),
-}));
+jest.mock("expo-secure-store");
+SecureStore.getItemAsync.mockReturnValue(Promise.resolve("testtoken"));
 
 const setup = () => {
   const utils = render(
@@ -44,27 +40,6 @@ describe("LoginForm", () => {
     expect(passwordInput).toBeTruthy();
     expect(loginButton).toBeTruthy();
   });
-
-  // Allows the user to input their email and password
-  // it("should allow the user to input their email and password", () => {
-  //   const onChange = jest.fn();
-
-  //   const { getByPlaceholderText } = render(
-  //     <NavigationContainer>
-  //       <LoginForm onChange={onChange} />
-  //     </NavigationContainer>
-  //   );
-
-  //   const emailInput = getByPlaceholderText("Correo Electrónico");
-  //   const passwordInput = getByPlaceholderText("Contraseña");
-
-  //   fireEvent.changeText(emailInput, "test@example.com");
-  //   fireEvent.changeText(passwordInput, "password123");
-
-  //   // Verificar las llamadas a la función onChange con los valores esperados
-  //   expect(onChange).toHaveBeenCalledWith("test@example.com");
-  //   expect(onChange).toHaveBeenCalledWith("password123");
-  // });
 
   // Validates the email and password inputs
   it("should validate the email and password inputs", () => {
@@ -138,8 +113,8 @@ describe("LoginForm", () => {
 
     fireEvent.press(loginButton);
 
-    let result = await SecureStore.getItemAsync("token");
-    await waitFor(() => {
+    await waitFor(async () => {
+      let result = await SecureStore.getItemAsync("token");
       expect(result).toBe("testtoken");
     });
   });
