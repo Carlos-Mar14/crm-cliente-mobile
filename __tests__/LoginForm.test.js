@@ -4,6 +4,7 @@ import {
   render,
   waitFor,
   screen,
+  getByTestId
 } from "@testing-library/react-native";
 import React from "react";
 import * as SecureStore from "expo-secure-store";
@@ -117,5 +118,13 @@ describe("LoginForm", () => {
       let result = await SecureStore.getItemAsync("token");
       expect(result).toBe("testtoken");
     });
+  });
+
+  it('should display the app logo', () => {
+
+    const { getByTestId } = setup();
+    const logoElement = getByTestId('logotest');
+
+    expect(logoElement).toBeTruthy();
   });
 });

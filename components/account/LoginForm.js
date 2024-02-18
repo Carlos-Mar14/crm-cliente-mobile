@@ -8,6 +8,7 @@ import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { validateEmail } from "../../utils/helpers";
 import { API_URL } from "../../utils/accions";
+import logo from "../../assets/wide_logo.png";
 
 async function SaveToken(token) {
   await SecureStore.setItemAsync("token", token);
@@ -67,12 +68,8 @@ export default function LoginForm() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.image}>
-        <Image
-          style={styles.image}
-          source={{ uri: "https://crm.gestiongroup.es/img/logo.svg" }}
-          resizeMode="contain"
-        />
+      <View style={styles.img}>
+        {<Image style={styles.img} source={logo} testID="logotest"/>}
       </View>
       <View style={styles.inputContainer}>
         <Input
@@ -103,7 +100,7 @@ export default function LoginForm() {
         <Button
           title="Iniciar Sesión"
           containerStyle={styles.btnContainer}
-          buttonStyle={[styles.btn, styles.btnText]}
+          buttonStyle={[styles.btnText]}
           onPress={() => doLogin()}
         />
       </View>
@@ -120,14 +117,16 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 100,
   },
-  image: {
-    width: 350,
-    height: 350,
-    marginTop: 50,
+  img: {
+    marginTop: 20,
+    width: 200,
+    height: 200,
+    //backgroundColor: "#000",
+    resizeMode: "contain",
   },
-  btn: {
+  btnContainer: {
     backgroundColor: "#c1c1c1",
-    marginLeft: 100,
+    marginLeft: 40,
     width: 130,
   },
   inputContainer: {

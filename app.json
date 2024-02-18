@@ -11,7 +11,9 @@
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
-      "**/*"
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.svg" 
     ],
     "ios": {
       "supportsTablet": true
@@ -24,6 +26,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "dependencies": {
+      "react-native-svg": "^13.0.0"
     }
   }
 }
