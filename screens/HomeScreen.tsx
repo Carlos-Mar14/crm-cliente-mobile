@@ -4,6 +4,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import LoginForm from "../components/account/LoginForm"
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParams } from "../navigations/StackNavigation";
+import { CalendarScreen } from "./CalendarScreen";
 
 interface Props extends StackScreenProps<RootStackParams, 'HomeScreen'> {}
 
@@ -11,9 +12,6 @@ export const HomeScreen = ({navigation}: Props) => {
     return (
     <View style={styles.input}>
         <Text><LoginForm/></Text>
-        <TouchableOpacity onPress={() => navigation.navigate('CalendarScreen')}>
-        <Text>Ir a Calendar</Text>
-      </TouchableOpacity>
     </View>
     )
 }

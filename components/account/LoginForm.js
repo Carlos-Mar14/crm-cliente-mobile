@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { StyleSheet, View, Image, Alert } from "react-native";
 import { Icon, Input, Button } from "react-native-elements";
 import { isEmpty } from "lodash";
@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { validateEmail } from "../../utils/helpers";
 import { API_URL } from "../../utils/accions";
 import logo from "../../assets/wide_logo.png";
+import { AuthContext } from "../AuthContext";
 
 async function SaveToken(token) {
   await SecureStore.setItemAsync("token", token);
@@ -27,6 +28,7 @@ export default function LoginForm() {
 
   //Constante para usar la importanción de la navegación
   const navigation = useNavigation();
+  const { setIsLoggedIn } = useContext(AuthContext);
 
   const onChange = (e, type) => {
     setFormData({ ...formData, [type]: e.nativeEvent.text });
@@ -40,6 +42,8 @@ export default function LoginForm() {
       const { email, password } = formData;
       const response = await axios.post(API_URL, { email, password });
       await SaveToken(response.data.token);
+      setIsLoggedIn(true);
+      navigation.navigate("CalendarScreen");
     } catch (error) {
       // Manejar el error
       if (error.response && error.response.status === 400) {
@@ -69,7 +73,7 @@ export default function LoginForm() {
   return (
     <View style={styles.container}>
       <View style={styles.img}>
-        {<Image style={styles.img} source={logo} testID="logotest"/>}
+        {<Image style={styles.img} source={logo} testID="logotest" />}
       </View>
       <View style={styles.inputContainer}>
         <Input
