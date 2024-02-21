@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
 import { DrawerContentComponentProps, DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
 import { AuthContext } from '../components/AuthContext';
 import { Icon, Button } from 'react-native-elements';
@@ -35,42 +35,44 @@ export const DrawerNavigation= () => {
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
     const { setIsLoggedIn } = useContext(AuthContext);
 
-  const logout = () => {
-    Alert.alert(
-      'Cerrar sesión',
-      '¿Estás seguro de que quieres cerrar sesión?',
-      [
-        { text: "No", style: 'cancel', onPress: () => {} },
-        {
-          text: 'Sí',
-          style: 'destructive',
-          onPress: () => setIsLoggedIn(false),
-        },
-      ]
-    );
-  };
+    const logout = () => {
+        Alert.alert(
+          'Cerrar sesión',
+          '¿Estás seguro de que quieres cerrar sesión?',
+          [
+            { text: "No", style: 'cancel', onPress: () => {} },
+            {
+              text: 'Sí',
+              style: 'destructive',
+              onPress: () => {
+                setIsLoggedIn(false);
+                navigation.closeDrawer(); // Cierra el Drawer
+              },
+            },
+          ]
+        );
+      };
+      
 
-    return(
-        <DrawerContentScrollView
-            style={{backgroundColor: '#00A294'}}
-        >
-            <View>
-                <TouchableOpacity onPress={()=> navigation.navigate('Home')}>
-                    <Text>Home</Text>
+      return(
+        <DrawerContentScrollView style={styles.menuDrawer}>
+            <View style={styles.drawerContent}>
+                <TouchableOpacity style={styles.drawerItem} onPress={()=> navigation.navigate('Home')}>
+                    <Text style={styles.drawerText}>Home</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=> navigation.navigate('CalendarScreen')}>
-                    <Text>Agenda</Text>
+                <TouchableOpacity style={styles.drawerItem} onPress={()=> navigation.navigate('CalendarScreen')}>
+                    <Text style={styles.drawerText}>Agenda</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=> navigation.navigate('ProfileScreen')}>
-                    <Text>Perfil</Text>
+                <TouchableOpacity style={styles.drawerItem} onPress={()=> navigation.navigate('ProfileScreen')}>
+                    <Text style={styles.drawerText}>Perfil</Text>
                 </TouchableOpacity>
                 <Button
                     icon={
-                        <Icon
-                            name="exit-to-app"
-                            size={15}
-                            color="white"
-                        />
+                    <Icon
+                        name="exit-to-app"
+                        size={15}
+                        color="white"
+                    />
                     }
                     title=" Cerrar sesión"
                     onPress={logout}
@@ -79,3 +81,21 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
         </DrawerContentScrollView>
     )
 }
+
+const styles = StyleSheet.create({
+    menuDrawer:{
+      backgroundColor: '#00A2',
+      width: 200,
+    },
+    drawerContent: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    drawerItem: {
+      width: '100%', 
+      justifyContent: 'center', 
+    },
+    drawerText: {
+      textAlign: 'center', 
+    },
+})

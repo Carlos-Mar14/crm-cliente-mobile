@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ActivityIndicator, Modal, View } from "react-native";
+import { Modal, View } from "react-native";
 import { createStackNavigator } from '@react-navigation/stack';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';

@@ -4,7 +4,7 @@ import {
   render,
   waitFor,
   screen,
-  getByTestId
+  getByTestId,
 } from "@testing-library/react-native";
 import React from "react";
 import * as SecureStore from "expo-secure-store";
@@ -120,10 +120,9 @@ describe("LoginForm", () => {
     });
   });
 
-  it('should display the app logo', () => {
-
+  it("should display the app logo", () => {
     const { getByTestId } = setup();
-    const logoElement = getByTestId('logotest');
+    const logoElement = getByTestId("logotest");
 
     expect(logoElement).toBeTruthy();
   });
@@ -131,12 +130,11 @@ describe("LoginForm", () => {
   it("should verify if user is logged in", async () => {
     // Simula un token de autenticación almacenado
     SecureStore.setItemAsync("token", "testtoken");
-  
+
     // Recupera el token de autenticación
     const token = await SecureStore.getItemAsync("token");
-  
+
     // Comprueba si el token existe
     expect(token).not.toBeNull();
   });
-  
 });

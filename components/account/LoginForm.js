@@ -125,7 +125,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 200,
     height: 200,
-    //backgroundColor: "#000",
     resizeMode: "contain",
   },
   btnContainer: {
