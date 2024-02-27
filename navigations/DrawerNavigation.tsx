@@ -3,7 +3,7 @@ import { View, Text, Alert, StyleSheet } from 'react-native';
 import { DrawerContentComponentProps, DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
 import { AuthContext } from '../components/AuthContext';
 import { Icon, Button } from 'react-native-elements';
-
+import * as SecureStore from 'expo-secure-store';
 
 import { StackNavigation } from './StackNavigation';
 import { CalendarScreen } from '../screens/CalendarScreen';
@@ -34,24 +34,26 @@ export const DrawerNavigation= () => {
 
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
     const { setIsLoggedIn } = useContext(AuthContext);
-
-    const logout = () => {
-        Alert.alert(
-          'Cerrar sesión',
-          '¿Estás seguro de que quieres cerrar sesión?',
-          [
-            { text: "No", style: 'cancel', onPress: () => {} },
-            {
-              text: 'Sí',
-              style: 'destructive',
-              onPress: () => {
-                setIsLoggedIn(false);
-                navigation.closeDrawer(); // Cierra el Drawer
-              },
+    const logout = async () => {
+      Alert.alert(
+        'Cerrar sesión',
+        '¿Estás seguro de que quieres cerrar sesión?',
+        [
+          { text: "No", style: 'cancel', onPress: () => {} },
+          {
+            text: 'Sí',
+            style: 'destructive',
+            onPress: async () => {
+              await SecureStore.deleteItemAsync("token"); // Borra el token de autenticación
+              setIsLoggedIn(false);
+              navigation.closeDrawer(); // Cierra el Drawer
             },
-          ]
-        );
-      };
+          },
+        ]
+      );
+  };
+  
+  
       
 
       return(
