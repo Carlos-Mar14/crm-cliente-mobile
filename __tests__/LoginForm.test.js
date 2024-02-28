@@ -9,6 +9,8 @@ import {
 import React from "react";
 import * as SecureStore from "expo-secure-store";
 import LoginForm from "../components/account/LoginForm";
+import { CalendarScreen } from "../screens/CalendarScreen";
+import { AuthContext } from "../components/AuthContext";
 
 jest.mock("expo-secure-store");
 SecureStore.getItemAsync.mockReturnValue(Promise.resolve("testtoken"));
@@ -136,5 +138,41 @@ describe("LoginForm", () => {
 
     // Comprueba si el token existe
     expect(token).not.toBeNull();
+  });
+});
+
+describe("CalendarScreen", () => {
+  it('changes to month view when "Mes" button is pressed', () => {
+    // Proporciona un valor falso para setIsLoggedIn y cualquier otro valor necesario
+    const mockSetIsLoggedIn = jest.fn();
+    const mockAuthValue = { setIsLoggedIn: mockSetIsLoggedIn };
+
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>
+    );
+  });
+  it('changes to week view when "Semana" button is pressed', () => {
+    const mockSetIsLoggedIn = jest.fn();
+    const mockAuthValue = { setIsLoggedIn: mockSetIsLoggedIn };
+
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>
+    );
+    fireEvent.press(getByText("Semana"));
+  });
+  it('changes to today and switches to week view when "HOY" button is pressed', () => {
+    const mockSetIsLoggedIn = jest.fn();
+    const mockAuthValue = { setIsLoggedIn: mockSetIsLoggedIn };
+
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>
+    );
+    fireEvent.press(getByText("HOY"));
   });
 });

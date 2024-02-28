@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, StyleSheet, Button, Alert, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Button, Alert, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { AuthContext } from '../components/AuthContext';
 import { Calendar, LocaleConfig, WeekCalendar, CalendarProvider } from 'react-native-calendars';
 import { DayState } from 'react-native-calendars/src/types';
@@ -11,6 +11,7 @@ export const CalendarScreen = () => {
   const navigation = useNavigation();
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
   const { setIsLoggedIn } = useContext(AuthContext);
+  const screenWidth = Dimensions.get('window').width;
   // Eventos, tareas o recordatorios
   const [events, setEvents] = useState({
     '2024-02-22': {marked: true, dotColor: 'red', title: 'Visita gas Primark', title2: 'Tecnico GestionGroup'},
@@ -80,14 +81,25 @@ export const CalendarScreen = () => {
     day: number;
   }
   const CustomDayComponent: React.FC<CustomDayComponentProps> = ({ date, ...otherProps }) => {
-    const event = events[date?.dateString];
-    const isValidDate = (dateString: string) => {
-      return !isNaN(Date.parse(dateString));
-    };
+  const event = events[date?.dateString];
+  const isValidDate = (dateString: string) => {
+    return !isNaN(Date.parse(dateString));
+  };
+  
+    
     const renderButton = () => {
       if (!isValidDate(date?.dateString)) {
         return null; // No mostrar el botón si la fecha no es válida
       }
+      const isToday = (dateString: string) => {
+        const today = new Date();
+        const dateToCompare = new Date(dateString);
+        return (
+          dateToCompare.getDate() === today.getDate() &&
+          dateToCompare.getMonth() === today.getMonth() &&
+          dateToCompare.getFullYear() === today.getFullYear()
+        );
+      };
       const isSelected = selectedDate === date?.dateString;
       const formatDate = (dateString: string | number | Date, isSelected: boolean) => {
         let dateStr: string;
@@ -104,14 +116,17 @@ export const CalendarScreen = () => {
           return '';
         }
         return `${date.getDate()}`;
-      };
+    };
+
+    const buttonStyle = isToday(date?.dateString) ? styles.todayText : styles.dayText;
       return (
         <View style={isSelected ? styles.selectedDayButton : event ? styles.eventDayButton : styles.defaultDayButton}>
           <TouchableOpacity
             style={styles.dateButton}
             onPress={() => onDayPress({ dateString: date?.dateString || '' })}
           >
-            <Text>{formatDate(date?.dateString, isSelected)}</Text>
+            <Text style={buttonStyle}>{formatDate(date?.dateString, isSelected)}</Text>
+            {event && <Text style={styles.eventTitle}>{event.title}</Text>}
           </TouchableOpacity>
         </View>
       );
@@ -119,11 +134,18 @@ export const CalendarScreen = () => {
     return (
       <View style={styles.dayContainer}>
         {renderButton()}
-        {event && <Text style={styles.eventTitle}>{event.title}</Text>}
       </View>
     );
   };
   
+  const goToToday = () => {
+    const today = new Date().toISOString().split('T')[0]; // Obtiene la fecha actual en formato YYYY-MM-DD
+    setSelectedDate(today);
+    if (calendarMode !== 'week') {
+      setCalendarMode('week');
+    }
+ };
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -136,6 +158,10 @@ export const CalendarScreen = () => {
           title="Semana"
           onPress={() => setCalendarMode('week')}
         />
+        <Button
+          title="HOY"
+          onPress={goToToday}
+        />
       </View>
       <CalendarProvider date={selectedDate || Date()} onDateChanged={setSelectedDate}>
         {calendarMode === 'month' ? (
@@ -145,14 +171,17 @@ export const CalendarScreen = () => {
             firstDay={1}
             dayComponent={CustomDayComponent}
             markedDates={markedDates}
+            style={styles.monthCalendarContainer}
           />
         ) : (
-          <WeekCalendar
-            current={selectedDate || Date()}
-            onDayPress={onDayPress}
-            dayComponent={CustomDayComponent}
-            markedDates={markedDates}
-          />
+          <View style={styles.weekCalendarContainer}>
+            <WeekCalendar
+                current={selectedDate || Date()}
+                onDayPress={onDayPress}
+                dayComponent={CustomDayComponent}
+                markedDates={markedDates}
+            />
+          </View>
         )}
       </CalendarProvider>
       <View style={styles.eventsContainer}>
@@ -169,71 +198,97 @@ export const CalendarScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-      flex:   1
+    flex:  1,
+    backgroundColor: '#fff',
   },
   buttonContainer: {
-      flexDirection: 'row',   
-      marginRight:   10,
-      marginLeft:   5,
-      marginTop:   30,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginHorizontal:  10,
+    marginTop:  30,
   },
   title: {
-      marginRight:   10,
-      alignSelf: 'center',
-      fontSize:   18
+    fontSize:  18,
+    fontWeight: 'bold',
+    marginRight:  10, 
   },
   dayContainer: {
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 5,
+    paddingVertical: 0,
+    height: 50, 
+  },
+  dateButton: {
+    borderRadius: 5,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0, 
   },
   dayText: {
-    fontSize:   16,
+    fontSize: 13,
+    lineHeight: 13,
+    textAlign: 'center',
   },
   eventTitle: {
-    fontSize:   12,
+    fontSize: 13, 
     color: 'black',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 0, 
   },
-  // selectedDay: {
-  //   backgroundColor: 'blue',
-  // },
-  // markedDay: {
-  //   backgroundColor: '#6C8EFF',
-  // },
+  todayText: {
+    fontWeight: 'bold',
+    color: 'red', 
+  },
   selectedDayButton: {
-    backgroundColor: '#28BBFF',
+    backgroundColor: '#e5e5e5',
     alignItems: 'center',
     justifyContent: 'center',
-    padding:  10,
+    padding:  15,
+    borderRadius:  5,
+    height: 50
   },
   eventDayButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding:  10,
+    padding:  15,
+    backgroundColor: '#f0f0f0',
+    height: 50
   },
   defaultDayButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding:  10,
+    padding:  0,
+    height: 20
   },
-  dateButton: {
-    borderColor: 'transparent', 
-    borderWidth: 0,
-    color: 'transparent'
-  },
-eventsContainer: {
-  padding: 10,
-  marginTop: 20,
-  borderTopWidth: 1,
-  borderTopColor: '#ccc',
-},
-eventsTitle: {
-  fontSize: 16,
-  fontWeight: 'bold',
-  marginBottom: 10,
-},
-eventText: {
-  fontSize: 14,
-  marginBottom: 5,
-},
+  eventsContainer: {
+    padding:  30,
+    marginTop:  20,
+    borderTopWidth:  1,
+    borderTopColor: '#ccc',
+  },
+  eventsTitle: {
+    fontSize:  16,
+    fontWeight: 'bold',
+    marginBottom:  10,
+  },
+  eventText: {
+    fontSize:  14,
+    marginBottom:  5,
+  },
+  weekCalendarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 5,
+    width: '100%',
+    flex: 1,
+  },
+  monthCalendarContainer:{
+
+  }
 });
