@@ -14,9 +14,24 @@ export const CalendarScreen = () => {
   const screenWidth = Dimensions.get('window').width;
   // Eventos, tareas o recordatorios
   const [events, setEvents] = useState({
-    '2024-02-22': {marked: true, dotColor: 'red', title: 'Visita gas Primark', title2: 'Tecnico GestionGroup'},
-    '2024-02-23': {marked: true, dotColor: 'blue', title: 'Endesa visita técnico'},
+    '2024-02-22': {
+      marked: true,
+      title: 'Visita gas Primark',
+      title2: 'Tecnico GestionGroup',
+      hour: '09:00',
+    },
+    '2024-02-23': {
+      marked: true,
+      title: 'Endesa visita técnico',
+      hour: '14:00',
+    },
   });
+
+  const hoursGrid = Array.from({ length: 24 }, (_, index) => {
+    const hour = index.toString().padStart(2, '0') + ':00';
+    return { hour, events: [] };
+  });
+  
   useEffect(() => {
     console.log('selectedDate actualizado:', selectedDate);
     }, [selectedDate]);
@@ -59,11 +74,6 @@ export const CalendarScreen = () => {
     });
   }, [navigation, setIsLoggedIn]);
 
-  // Marcar el día actual en color claro y el día seleccionado en azul
-  const markedDates = {
-    ...events,
-    [selectedDate]: {selected: true, selectedColor: 'blue'},
-  };
   // Define un tipo para las props de CustomDayComponent
   interface DateData {
     dateString: string;
@@ -79,14 +89,15 @@ export const CalendarScreen = () => {
     state: DayState;
     marking: any;
     day: number;
+    viewMode: 'month' | 'week';
+    calendarMode: string;
   }
-  const CustomDayComponent: React.FC<CustomDayComponentProps> = ({ date, ...otherProps }) => {
-  const event = events[date?.dateString];
-  const isValidDate = (dateString: string) => {
-    return !isNaN(Date.parse(dateString));
-  };
-  
-    
+  const CustomDayComponent: React.FC<CustomDayComponentProps & { calendarMode: string }> = ({ date, viewMode, calendarMode, ...otherProps }) => {
+    const event = events[date?.dateString];
+    const isSelected = selectedDate === date?.dateString;
+    const isValidDate = (dateString: string) => {
+      return !isNaN(Date.parse(dateString));
+    };
     const renderButton = () => {
       if (!isValidDate(date?.dateString)) {
         return null; // No mostrar el botón si la fecha no es válida
@@ -100,7 +111,6 @@ export const CalendarScreen = () => {
           dateToCompare.getFullYear() === today.getFullYear()
         );
       };
-      const isSelected = selectedDate === date?.dateString;
       const formatDate = (dateString: string | number | Date, isSelected: boolean) => {
         let dateStr: string;
         if (typeof dateString === 'number' || dateString instanceof Date) {
@@ -116,9 +126,9 @@ export const CalendarScreen = () => {
           return '';
         }
         return `${date.getDate()}`;
-    };
+      };
+      const buttonStyle = isToday(date?.dateString) ? styles.todayText : styles.dayText;
 
-    const buttonStyle = isToday(date?.dateString) ? styles.todayText : styles.dayText;
       return (
         <View style={isSelected ? styles.selectedDayButton : event ? styles.eventDayButton : styles.defaultDayButton}>
           <TouchableOpacity
@@ -126,25 +136,39 @@ export const CalendarScreen = () => {
             onPress={() => onDayPress({ dateString: date?.dateString || '' })}
           >
             <Text style={buttonStyle}>{formatDate(date?.dateString, isSelected)}</Text>
-            {event && <Text style={styles.eventTitle}>{event.title}</Text>}
+            {event && calendarMode === 'month' && (
+              <>
+                <Text style={styles.eventTitle}>{event.title}</Text>
+                {event.title2 && <Text style={styles.eventTitle}>{event.title2}</Text>}
+              </>
+            )}
           </TouchableOpacity>
         </View>
       );
     };
-    return (
-      <View style={styles.dayContainer}>
-        {renderButton()}
-      </View>
-    );
+
+      return (
+        <View style={styles.dayContainer}>
+          <View style={styles.dateContainer}>
+            {renderButton()}
+          </View>
+          {viewMode === 'month' && event && (
+            <View style={styles.eventContainer}>
+              <Text style={styles.eventTitle}>{event.title}</Text>
+              {event.title2 && <Text style={styles.eventTitle}>{event.title2}</Text>}
+            </View>
+          )}
+        </View>
+      );
   };
-  
+
   const goToToday = () => {
     const today = new Date().toISOString().split('T')[0]; // Obtiene la fecha actual en formato YYYY-MM-DD
     setSelectedDate(today);
     if (calendarMode !== 'week') {
       setCalendarMode('week');
     }
- };
+  };
 
   return (
     <View style={styles.container}>
@@ -166,20 +190,18 @@ export const CalendarScreen = () => {
       <CalendarProvider date={selectedDate || Date()} onDateChanged={setSelectedDate}>
         {calendarMode === 'month' ? (
           <Calendar
-            current={selectedDate || Date()}
-            onDayPress={onDayPress}
-            firstDay={1}
-            dayComponent={CustomDayComponent}
-            markedDates={markedDates}
-            style={styles.monthCalendarContainer}
+          current={selectedDate || Date()}
+          onDayPress={onDayPress}
+          firstDay={1}
+          dayComponent={(props) => <CustomDayComponent {...props as CustomDayComponentProps} calendarMode={calendarMode} />}
+          style={styles.monthCalendarContainer}
           />
         ) : (
           <View style={styles.weekCalendarContainer}>
             <WeekCalendar
                 current={selectedDate || Date()}
                 onDayPress={onDayPress}
-                dayComponent={CustomDayComponent}
-                markedDates={markedDates}
+                dayComponent={(props) => <CustomDayComponent {...props as CustomDayComponentProps} calendarMode={calendarMode} />}
             />
           </View>
         )}
@@ -217,9 +239,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 5,
-    paddingVertical: 0,
-    height: 50, 
+    marginBottom: 10,
+    height: 60, 
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    //alignItems: 'center',
+    height: 20,
   },
   dateButton: {
     borderRadius: 5,
@@ -227,11 +253,12 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 0, 
+    //padding: 1, 
+    
   },
   dayText: {
     fontSize: 13,
-    lineHeight: 13,
+    lineHeight: 23,
     textAlign: 'center',
   },
   eventTitle: {
@@ -239,7 +266,12 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: 0, 
+    marginTop: 0,
+  },
+  eventContainer: {
+    marginTop: 10,
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   todayText: {
     fontWeight: 'bold',
@@ -249,7 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e5e5e5',
     alignItems: 'center',
     justifyContent: 'center',
-    padding:  15,
+    padding: 15,
     borderRadius:  5,
     height: 50
   },
@@ -268,7 +300,7 @@ const styles = StyleSheet.create({
   },
   eventsContainer: {
     padding:  30,
-    marginTop:  20,
+    marginTop:  460,
     borderTopWidth:  1,
     borderTopColor: '#ccc',
   },
