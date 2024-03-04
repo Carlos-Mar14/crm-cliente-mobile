@@ -1,14 +1,14 @@
-import React, { useContext } from 'react';
-import { View, Text, Alert, StyleSheet } from 'react-native';
 import { DrawerContentComponentProps, DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
+import React, { useContext } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Button, Icon } from 'react-native-elements';
 import { AuthContext } from '../components/AuthContext';
-import { Icon, Button } from 'react-native-elements';
-import * as SecureStore from 'expo-secure-store';
 
-import { StackNavigation } from './StackNavigation';
-import { CalendarScreen } from '../screens/CalendarScreen';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { CalendarScreen } from '../screens/CalendarScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { removeToken } from '../utils/token';
+import { StackNavigation } from './StackNavigation';
 
 export type RootDrawerParams= {
     Home: undefined;
@@ -44,7 +44,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
             text: 'Sí',
             style: 'destructive',
             onPress: async () => {
-              await SecureStore.deleteItemAsync("token"); // Borra el token de autenticación
+              await removeToken()
               setIsLoggedIn(false);
               navigation.closeDrawer(); // Cierra el Drawer
             },

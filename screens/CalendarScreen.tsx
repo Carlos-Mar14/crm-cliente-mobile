@@ -1,9 +1,9 @@
-import React, { useEffect, useContext, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, StyleSheet, Button, Alert, Text, TouchableOpacity, Dimensions } from 'react-native';
-import { AuthContext } from '../components/AuthContext';
-import { Calendar, LocaleConfig, WeekCalendar, CalendarProvider } from 'react-native-calendars';
+import React, { useContext, useEffect, useState } from 'react';
+import { Alert, Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Calendar, CalendarProvider, LocaleConfig, WeekCalendar } from 'react-native-calendars';
 import { DayState } from 'react-native-calendars/src/types';
+import { AuthContext } from '../components/AuthContext';
 
 export const CalendarScreen = () => {
   const [calendarMode, setCalendarMode] = useState('month');
@@ -51,6 +51,8 @@ export const CalendarScreen = () => {
     today: 'Hoy',
   };
   LocaleConfig.defaultLocale = 'es';
+
+  // TODO: para que signout en el calendario?
   // SignOut
   useEffect(() => {
     return navigation.addListener('beforeRemove', (e) => {

@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import React, { createContext, useEffect, useState } from 'react';
+import { getToken, removeToken } from '../utils/token';
+
 
 const AuthContext = createContext({
   isLoggedIn: false,
@@ -16,43 +17,19 @@ const AuthProvider = ({ children }) => {
   // Cargar el estado de inicio de sesión al iniciar la aplicación
   useEffect(() => {
     const loadLoginStatus = async () => {
-      const savedLoginStatus = await SecureStore.getItemAsync('isLoggedIn');
-      const savedToken = await recuperarToken();
-      setIsLoggedIn(savedLoginStatus === 'true' && savedToken !== null);
-      setToken(savedToken);
+      const token = await getToken()
+      setIsLoggedIn(!!token);
+      setToken(token)
     };
     loadLoginStatus();
   }, []);
   
 
-  // Guardar el estado de inicio de sesión cada vez que cambie
-  useEffect(() => {
-    SecureStore.setItemAsync('isLoggedIn', isLoggedIn.toString());
-  }, [isLoggedIn]);
-
   const cerrarSesion = async () => {
-    await eliminarToken();
+    await removeToken();
     setIsLoggedIn(false);
     setToken('');
     // (Opcional) gestionar la navegación u otras acciones al cerrar la sesión
-  };
-
-  const recuperarToken = async () => {
-    try {
-      const token = await SecureStore.getItemAsync('token');
-      return token;
-    } catch (error) {
-      console.error('Error al recuperar el token:', error);
-      return null;
-    }
-  };
-
-  const eliminarToken = async () => {
-    try {
-      await SecureStore.deleteItemAsync('token');
-    } catch (error) {
-      console.error('Error al eliminar el token:', error);
-    }
   };
 
   return (
