@@ -1,12 +1,10 @@
-import React, { useContext } from 'react';
+import { createStackNavigator } from "@react-navigation/stack";
+import React, { useContext } from "react";
 import { Modal, View } from "react-native";
-import { createStackNavigator } from '@react-navigation/stack';
-import { HomeScreen } from '../screens/HomeScreen';
-import { CalendarScreen } from '../screens/CalendarScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
-import { AuthContext } from '../components/AuthContext';
-import LoginForm from '../components/account/LoginForm';
-
+import { AuthContext } from "../components/AuthContext";
+import LoginForm from "../components/account/LoginForm";
+import { CalendarScreen } from "../screens/CalendarScreen";
+import { ProfileScreen } from "../screens/ProfileScreen";
 export type RootStackParams = {
   HomeScreen: undefined;
   CalendarScreen: undefined;
@@ -16,30 +14,31 @@ export type RootStackParams = {
 const Stack = createStackNavigator<RootStackParams>();
 
 export const StackNavigation = () => {
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, loading } = useContext(AuthContext);
 
-  return (
-    isLoggedIn ? (
+  if (loading) {
+    return <>Loading...</>;
+  }
+
+  if (isLoggedIn) {
+    return (
       <Stack.Navigator
-        initialRouteName='HomeScreen'
+        initialRouteName="CalendarScreen"
         screenOptions={{
           headerShown: false,
         }}
       >
-        <Stack.Screen name='HomeScreen' component={HomeScreen} />
-        <Stack.Screen name='CalendarScreen' component={CalendarScreen} />
-        <Stack.Screen name='ProfileScreen' component={ProfileScreen} />
+        <Stack.Screen name="CalendarScreen" component={CalendarScreen} />
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       </Stack.Navigator>
-    ) : (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={!isLoggedIn}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <LoginForm />
-        </View>
-      </Modal>
-    )
+    );
+  }
+
+  return (
+    <Modal animationType="slide" transparent={true} visible={true}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <LoginForm />
+      </View>
+    </Modal>
   );
 };

@@ -1,13 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
 import { isEmpty } from "lodash";
 import React, { useContext, useState } from "react";
 import { Alert, Image, StyleSheet, View } from "react-native";
 import { Button, Icon, Input } from "react-native-elements";
 import logo from "../../assets/wide_logo.png";
-import { API_URL } from "../../utils/accions";
+import { api, saveToken } from "../../utils/api";
 import { validateEmail } from "../../utils/helpers";
-import { saveToken } from "../../utils/token";
 import { AuthContext } from "../AuthContext";
 
 
@@ -36,7 +34,7 @@ export default function LoginForm() {
     }
     try {
       const { email, password } = formData;
-      const response = await axios.post(API_URL, { email, password });
+      const response = await api.post('/token-auth/', { email, password });
       await saveToken(response.data.token);
       setIsLoggedIn(true);
       navigation.navigate("CalendarScreen");

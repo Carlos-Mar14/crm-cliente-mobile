@@ -3,8 +3,8 @@ import { Alert, Button, StyleSheet, Text, TouchableOpacity, View } from 'react-n
 import { AgendaList } from 'react-native-calendars';
 
 
-const AgendaItem = (props) => {
-    const {item} = props;
+const AgendaItem = ({ item: section }) => {
+  const item = section.item
   
     const buttonPressed = useCallback(() => {
       Alert.alert('Show me more');
@@ -13,6 +13,7 @@ const AgendaItem = (props) => {
     const itemPressed = useCallback(() => {
       Alert.alert(item.title);
     }, []);
+
   
     if (!Object.keys(item).length) {
       return (
@@ -21,10 +22,11 @@ const AgendaItem = (props) => {
         </View>
       );
     }
+
   
     return (
       <TouchableOpacity onPress={itemPressed} style={styles.item} >
-        <View>
+        <View >
           <Text style={styles.itemHourText}>{item.hour}</Text>
           <Text style={styles.itemDurationText}>{item.duration}</Text>
         </View>
@@ -37,28 +39,17 @@ const AgendaItem = (props) => {
   };
   
 
-const items: any[] = [
-    {
-        title: 'test',
-        data: [
-          {hour: '1pm', duration: '1h', title: 'Ashtanga Yoga'},
-          {hour: '2pm', duration: '1h', title: 'Deep Stretches'},
-          {hour: '3pm', duration: '1h', title: 'Private Yoga'}
-        ]
-      },
-]
 
+const AgentAgenda = ({ events  } :{ events: any[]}) => {
 
-const AgentAgenda = () => {
-  const renderItem = useCallback(({item}: any) => {
+  const renderItem = useCallback((item) => {
     return <AgendaItem item={item}/>;
   }, []);
 
-
     return (
-    <View style={{ flex: 1 }}>
+    <View style={{ }}>
       <AgendaList
-        sections={items}
+        sections={events}
         renderItem={renderItem}
       />
     </View>

@@ -7,7 +7,6 @@ import { AuthContext } from '../components/AuthContext';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { removeToken } from '../utils/token';
 import { StackNavigation } from './StackNavigation';
 
 export type RootDrawerParams= {
@@ -33,8 +32,8 @@ export const DrawerNavigation= () => {
 }
 
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
-    const { setIsLoggedIn } = useContext(AuthContext);
-    const logout = async () => {
+    const { logout } = useContext(AuthContext);
+    const onLogout = async () => {
       Alert.alert(
         'Cerrar sesión',
         '¿Estás seguro de que quieres cerrar sesión?',
@@ -44,8 +43,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
             text: 'Sí',
             style: 'destructive',
             onPress: async () => {
-              await removeToken()
-              setIsLoggedIn(false);
+              await logout();
               navigation.closeDrawer(); // Cierra el Drawer
             },
           },
@@ -77,7 +75,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
                     />
                     }
                     title=" Cerrar sesión"
-                    onPress={logout}
+                    onPress={onLogout}
                 />
             </View>
         </DrawerContentScrollView>

@@ -1,46 +1,83 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Calendar, CalendarProvider, LocaleConfig, WeekCalendar } from 'react-native-calendars';
+import React, { useEffect, useState } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Calendar, CalendarProvider, LocaleConfig } from 'react-native-calendars';
 import { DayState } from 'react-native-calendars/src/types';
-import { AuthContext } from '../components/AuthContext';
+import { api } from '../utils/api';
+import AgentAgenda from './AgendaView';
+
+interface ApiEvent {
+  name: string,
+  start: string,
+  end: string,
+  type: string,
+  card_id: string,
+  status: string,
+  color: string,
+  human_type: string,
+  comment?: string,
+  event_id?: number,
+  contract_id?: number,
+}
+
+interface AgendaEventData {
+  title: string,
+  hour: string,
+  duration: string
+}
+
+interface AgendaEvent { 
+  title: string,
+  data: AgendaEventData[]
+}
+
+const filterOnlyUnique = (value: any, index: any, self: any) => {
+  return self.indexOf(value) === index;
+}
 
 export const CalendarScreen = () => {
   const [calendarMode, setCalendarMode] = useState('month');
-  const [selectedDate, setSelectedDate] = useState('');
-  const navigation = useNavigation();
-  const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
-  const { setIsLoggedIn } = useContext(AuthContext);
-  const screenWidth = Dimensions.get('window').width;
-  // Eventos, tareas o recordatorios
-  const [events, setEvents] = useState({
-    '2024-02-22': {
-      marked: true,
-      title: 'Visita gas Primark',
-      title2: 'Tecnico GestionGroup',
-      hour: '09:00',
-    },
-    '2024-02-23': {
-      marked: true,
-      title: 'Endesa visita técnico',
-      hour: '14:00',
-    },
-  });
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [events, setEvents] = useState<AgendaEvent[]>([]);
 
-  const hoursGrid = Array.from({ length: 24 }, (_, index) => {
-    const hour = index.toString().padStart(2, '0') + ':00';
-    return { hour, events: [] };
-  });
-  
   useEffect(() => {
-    console.log('selectedDate actualizado:', selectedDate);
-    }, [selectedDate]);
-    const onDayPress = (day: { dateString: string; }) => {
-      setSelectedDate(day.dateString);
-      // Obtener eventos para el día seleccionado
-      const eventsForSelectedDate = events[day.dateString] ? [events[day.dateString]] : [];
-      setEventsForSelectedDate(eventsForSelectedDate);
-    };
+    getItems();
+  }, []);
+
+  const apiEventsToAgendaEvents = (apiEvents: ApiEvent[]): AgendaEvent[] => {
+    const days = apiEvents.map(({ start }) =>  start.split('T')[0] ).toSorted().filter(filterOnlyUnique)
+
+    return days.map((day) => {
+      const dayEvents = apiEvents.filter(({ start }) => start.split('T')[0] === day)
+      return {
+        title: day.toLocaleString(),
+        data: dayEvents.map((event) => {
+          return {
+            title: event.name,
+            hour: new Date(event.start).getTime().toString(),
+            duration: '1h'
+          }          
+        })
+      }
+    })
+  }
+
+  async function getItems() {
+    const { data }: { data: ApiEvent[] } = await api.get('/agent_agenda/agenda/')
+    const agendaEvents = apiEventsToAgendaEvents(data)
+    setEvents(agendaEvents)
+  }  
+  const onDayPress = (day: { dateString: string; }) => {
+    setSelectedDate(day.dateString);
+  };
+
+  const goToToday = () => {
+    const today = new Date().toISOString().split('T')[0]; // Obtiene la fecha actual en formato YYYY-MM-DD
+    setSelectedDate(today);
+    if (calendarMode !== 'week') {
+      setCalendarMode('week');
+    }
+  };
+
 
   // CalendarCastellano
   LocaleConfig.locales['es'] = {
@@ -52,29 +89,6 @@ export const CalendarScreen = () => {
   };
   LocaleConfig.defaultLocale = 'es';
 
-  // TODO: para que signout en el calendario?
-  // SignOut
-  useEffect(() => {
-    return navigation.addListener('beforeRemove', (e) => {
-      e.preventDefault();
-
-      Alert.alert(
-        'Cerrar sesión',
-        '¿Estás seguro de que quieres cerrar sesión?',
-        [
-          { text: "No", style: 'cancel', onPress: () => {} },
-          {
-            text: 'Sí',
-            style: 'destructive',
-            onPress: () => {
-              navigation.dispatch(e.data.action);
-              setIsLoggedIn(false);
-            },
-          },
-        ]
-      );
-    });
-  }, [navigation, setIsLoggedIn]);
 
   // Define un tipo para las props de CustomDayComponent
   interface DateData {
@@ -95,7 +109,6 @@ export const CalendarScreen = () => {
     calendarMode: string;
   }
   const CustomDayComponent: React.FC<CustomDayComponentProps & { calendarMode: string }> = ({ date, viewMode, calendarMode, ...otherProps }) => {
-    const event = events[date?.dateString];
     const isSelected = selectedDate === date?.dateString;
     const isValidDate = (dateString: string) => {
       return !isNaN(Date.parse(dateString));
@@ -164,13 +177,6 @@ export const CalendarScreen = () => {
       );
   };
 
-  const goToToday = () => {
-    const today = new Date().toISOString().split('T')[0]; // Obtiene la fecha actual en formato YYYY-MM-DD
-    setSelectedDate(today);
-    if (calendarMode !== 'week') {
-      setCalendarMode('week');
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -189,7 +195,7 @@ export const CalendarScreen = () => {
           onPress={goToToday}
         />
       </View>
-      <CalendarProvider date={selectedDate || Date()} onDateChanged={setSelectedDate}>
+      <CalendarProvider date={selectedDate} onDateChanged={setSelectedDate}>
         {calendarMode === 'month' ? (
           <Calendar
           current={selectedDate || Date()}
@@ -199,18 +205,13 @@ export const CalendarScreen = () => {
           style={styles.monthCalendarContainer}
           />
         ) : (
-          <View style={styles.weekCalendarContainer}>
-            <WeekCalendar
-                current={selectedDate || Date()}
-                onDayPress={onDayPress}
-                dayComponent={(props) => <CustomDayComponent {...props as CustomDayComponentProps} calendarMode={calendarMode} />}
-            />
-          </View>
+          <AgentAgenda events={events.filter((event) => event.title === selectedDate)} />
+
         )}
       </CalendarProvider>
       <View style={styles.eventsContainer}>
         <Text style={styles.eventsTitle}>Eventos del día {selectedDate}</Text>
-        {eventsForSelectedDate.map((event, index) => (
+        {events.map((event, index) => (
           <Text key={index} style={styles.eventText}>
             {event.title}
           </Text>
