@@ -1,12 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import { isEmpty } from "lodash";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Image, StyleSheet, View } from "react-native";
 import { Button, Icon, Input } from "react-native-elements";
 import logo from "../../assets/wide_logo.png";
 import { api, saveToken } from "../../utils/api";
 import { validateEmail } from "../../utils/helpers";
-import { AuthContext } from "../AuthContext";
 
 
 export default function LoginForm() {
@@ -22,7 +21,6 @@ export default function LoginForm() {
 
   //Constante para usar la importanción de la navegación
   const navigation = useNavigation();
-  const { setIsLoggedIn } = useContext(AuthContext);
 
   const onChange = (e, type) => {
     setFormData({ ...formData, [type]: e.nativeEvent.text });
@@ -36,7 +34,6 @@ export default function LoginForm() {
       const { email, password } = formData;
       const response = await api.post('/token-auth/', { email, password });
       await saveToken(response.data.token);
-      setIsLoggedIn(true);
       navigation.navigate("CalendarScreen");
     } catch (error) {
       // Manejar el error
