@@ -14,25 +14,16 @@ export const CustomDayComponent = ({ day, eventsCount, isSelected, isToday, onPr
             style={[styles.dayButton, isToday && styles.todayDayButton, isSelected && styles.selectedDayButton]}
         >
             <Text style={[styles.dayTitle, eventsCount ? styles.dayTitleWithEvents : styles.dayTitleWoutEvents, isSelected && styles.selectedDayTitle, isToday && styles.todayDayTitle]}>{day}</Text>
-            {eventsCount && <Text style={[styles.daySubtitle, isSelected && styles.selectedDaySubtitle, isToday && styles.todayDaySubtitle]}>{eventsCount}</Text>}
+            {eventsCount > 0 && <Text style={[styles.daySubtitle, isSelected && styles.selectedDaySubtitle, isToday && styles.todayDaySubtitle]}>{eventsCount}</Text>}
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    dayContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 5,
-        width: '100%',
-        height: '100%'
-    },
     dayButton: {
         width: '100%',
-        height: '100%',
-        borderRadius: 20,
         alignItems: 'center',
+        height: 50,
         justifyContent: 'center',
     },
     dayTitle: {

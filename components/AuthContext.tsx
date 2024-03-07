@@ -5,12 +5,12 @@ import { getToken, refreshToken, removeToken } from '../utils/api';
 const AuthContext = createContext({
   isLoggedIn: false,
   loading: false,
-  logout: () => {},
+  logout: () => { },
 });
 
 const AuthProvider = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const checkAuth = async () => {
     setLoading(true)
@@ -34,7 +34,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAuth();
   }, []);
-  
+
 
   const logout = async () => {
     await removeToken();

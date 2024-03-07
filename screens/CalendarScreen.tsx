@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Calendar,
   CalendarProvider,
   LocaleConfig,
 } from "react-native-calendars";
 import { CustomDayComponent } from "../components/calendar/CustomDayComponent";
+import Toolbar from "../components/common/Toolbar";
 import { api } from "../utils/api";
 import { AgendaView } from "./AgendaView";
-
 const dateFromIso = (ds: Date | string): string =>
   (ds instanceof Date ? ds.toISOString() : ds).split("T")[0];
 
-interface ApiEvent {
+export interface ApiEvent {
   name: string;
   start: string;
   end: string;
@@ -26,72 +26,38 @@ interface ApiEvent {
   contract_id?: number;
 }
 
-interface AgendaEventData {
-  title: string;
-  hour: string;
-  duration: string;
-}
-
-interface AgendaEvent {
-  title: string;
-  dateString: string;
-  data: AgendaEventData[];
-}
-
-const filterOnlyUnique = (value: any, index: any, self: any) => {
-  return self.indexOf(value) === index;
-};
 
 export const CalendarScreen = () => {
-  const [calendarMode, setCalendarMode] = useState("month");
+  const [showAgenda, setShowAgenda] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dateFromIso(new Date()));
-  const [events, setEvents] = useState<AgendaEvent[]>([]);
+  const [events, setEvents] = useState<{ [dateString: string]: ApiEvent[] }>({});
 
   useEffect(() => {
     getItems();
   }, []);
 
-  const apiEventsToAgendaEvents = (apiEvents: ApiEvent[]): AgendaEvent[] => {
-    const timestamps: number[] = apiEvents
-      .map(({ start }) => new Date(dateFromIso(start)).getTime())
-      .filter(filterOnlyUnique)
-      .toSorted()
-
-
-    return timestamps.map((timestamp) => {
-      const dayEvents = apiEvents.filter(
-        ({ start }) => {
-          return new Date(dateFromIso(start)).getTime() === timestamp
-        }
-      );
-      const date = new Date(timestamp)
-      return {
-        title: date.toLocaleTimeString(),
-        dateString: dateFromIso(date),
-        data: dayEvents.map((event) => {
-          return {
-            title: event.name,
-            hour: new Date(event.start).getHours().toString(),
-            duration: "1h",
-          };
-        }),
-      };
-    });
+  const apiEventsToAgendaEvents = (apiEvents: ApiEvent[]): { [dateString: string]: ApiEvent[] } => {
+    return apiEvents.reduce((accumulator, event) => {
+      const dateString = dateFromIso(event.start);
+      if (accumulator[dateString]) {
+        accumulator[dateString].push(event)
+      } else {
+        accumulator[dateString] = [event]
+      }
+      return accumulator
+    }, {})
   };
 
   async function getItems() {
-    const { data }: { data: ApiEvent[] } = await api.get(
-      "/agent_agenda/agenda/"
-    );
+    const { data }: { data: ApiEvent[] } = await api.get("/agent_agenda/agenda/");
     const agendaEvents = apiEventsToAgendaEvents(data);
     setEvents(agendaEvents);
   }
-  const onDayPress = (day: { dateString: string }) => {
-    setSelectedDate(day.dateString);
-    setCalendarMode("week");
+  const onDayPress = (dateString: string) => {
+    setSelectedDate(dateString);
+    if (!showAgenda && events[dateString]) setShowAgenda(true);
   };
 
-  // CalendarCastellano
   LocaleConfig.locales["es"] = {
     monthNames: [
       "Enero",
@@ -139,30 +105,53 @@ export const CalendarScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.title}>Agenda</Text>
-        <Button color={calendarMode === "month" ? 'green' : "gray"} title="Mes" onPress={() => setCalendarMode("month")} />
-        <Button color={calendarMode === "week" ? 'green' : "gray"} title="Semana" onPress={() => setCalendarMode("week")} />
-        {!isToday(selectedDate) && <Button title="HOY" onPress={() => setSelectedDate(dateFromIso(new Date()))} />}
-      </View>
+      <Toolbar
+        title="Agenda"
+        rightButtons={[
+          // TODO: add icons for buttons
+          {
+            title: "Dia anterior",
+            style: {
+              backgroundColor: 'lightblue',
+            },
+            onPress: () => {
+
+            }
+          },
+          {
+            title: "Hoy",
+            style: {
+              backgroundColor: 'lightblue',
+            },
+            onPress: () => {
+            }
+          },
+          {
+            title: "Dia siguiente",
+            style: {
+              backgroundColor: 'lightblue',
+            },
+            onPress: () => {
+
+            }
+          }
+        ]}
+      />
 
       <CalendarProvider date={selectedDate} onDateChanged={setSelectedDate}>
-        {calendarMode === "month" ? (
+        {showAgenda ? (<AgendaView title={selectedDate} events={events[selectedDate]} />
+        ) : (
           <Calendar
             current={selectedDate}
             dayComponent={({ date }) => (
               <CustomDayComponent
                 day={date.day}
-                eventsCount={events.find((event) => event.dateString === date.dateString)?.data.length}
+                eventsCount={events[date.dateString]?.length || 0}
                 isSelected={date.dateString === selectedDate}
                 isToday={isToday(date.dateString)}
-                onPress={() => onDayPress(date)}
+                onPress={() => onDayPress(date.dateString)}
               />
             )}
-          />
-        ) : (
-          <AgendaView
-            events={events.filter((event) => event.dateString === selectedDate)}
           />
         )}
       </CalendarProvider>

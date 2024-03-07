@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import React, { useContext } from "react";
-import { Modal, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 import { AuthContext } from "../components/AuthContext";
 import LoginForm from "../components/account/LoginForm";
 import { CalendarScreen } from "../screens/CalendarScreen";
@@ -17,20 +17,23 @@ export const StackNavigation = () => {
   const { isLoggedIn, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <>Loading...</>;
+    return <Text>Loading...</Text>;
   }
 
   if (isLoggedIn) {
     return (
-      <Stack.Navigator
-        initialRouteName="CalendarScreen"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="CalendarScreen" component={CalendarScreen} />
-        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-      </Stack.Navigator>
+      <View style={{ padding: 20, flex: 1 }}>
+
+        <Stack.Navigator
+          initialRouteName="CalendarScreen"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="CalendarScreen" component={CalendarScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        </Stack.Navigator>
+      </View>
     );
   }
 

@@ -1,48 +1,34 @@
 import React, { useCallback } from 'react';
-import { Alert, Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AgendaList } from 'react-native-calendars';
+import { ApiEvent } from './CalendarScreen';
 
-const AgendaItem = ({ item: section }) => {
-  const item = section.item
+const _AgendaItem = ({ event }: { event: ApiEvent }) => {
+  const { name, start } = event
+  const hour = start.slice(11, 16)
 
-  const buttonPressed = useCallback(() => {
-    Alert.alert('Show me more');
-  }, []);
-
-  const itemPressed = useCallback(() => {
-    Alert.alert(item.title);
-  }, []);
-
-  if (!Object.keys(item).length) {
-    return (
-      <View style={styles.emptyItem}>
-        <Text style={styles.emptyItemText}>No hay eventos</Text>
-      </View>
-    );
+  const eventPressed = () => {
+    Alert.alert(event.name, JSON.stringify(event))
   }
 
   return (
-    <TouchableOpacity onPress={itemPressed} style={styles.item} >
+    <TouchableOpacity onPress={eventPressed} style={styles.item} >
       <View >
-        <Text style={styles.itemHourText}>{item.hour}</Text>
-        <Text style={styles.itemDurationText}>{item.duration}</Text>
+        <Text style={styles.itemHourText}>{hour}</Text>
       </View>
-      <Text style={styles.itemTitleText}>{item.title}</Text>
-      <View style={styles.itemButtonContainer}>
-        <Button color={'grey'} title={'Info'} onPress={buttonPressed} />
-      </View>
+      <Text style={styles.itemTitleText}>{name}</Text>
     </TouchableOpacity>
   );
 };
 
+const AgendaItem = React.memo(_AgendaItem);
 
-
-export const AgendaView = ({ events }: { events: any[] }) => {
-  const renderItem = (item) => <AgendaItem item={item} />;
+export const AgendaView = ({ title, events }: { title: string, events: ApiEvent[] }) => {
+  const renderItem = useCallback(({ item }) => <AgendaItem event={item} />, []);
 
   return (
     <AgendaList
-      sections={events}
+      sections={[{ title, data: events }]}
       renderItem={renderItem}
     />
   );
@@ -60,31 +46,10 @@ const styles = StyleSheet.create({
   itemHourText: {
     color: 'black'
   },
-  itemDurationText: {
-    color: 'grey',
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4
-  },
   itemTitleText: {
     color: 'black',
     marginLeft: 16,
     fontWeight: 'bold',
     fontSize: 16
   },
-  itemButtonContainer: {
-    flex: 1,
-    alignItems: 'flex-end'
-  },
-  emptyItem: {
-    paddingLeft: 20,
-    height: 52,
-    justifyContent: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'lightgrey'
-  },
-  emptyItemText: {
-    color: 'lightgrey',
-    fontSize: 14
-  }
 });
