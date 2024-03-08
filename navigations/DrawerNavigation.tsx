@@ -21,12 +21,11 @@ const Drawer = createDrawerNavigator<RootDrawerParams>();
 export const DrawerNavigation = () => {
   return (
     <Drawer.Navigator
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: true }}
       drawerContent={DrawerContent}>
 
-      <Drawer.Screen name="Home" component={StackNavigation} />
-      <Drawer.Screen name="Profile" component={ProfileScreen} />
       <Drawer.Screen name="Calendar" component={CalendarScreen} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
     </Drawer.Navigator>
   );
 }

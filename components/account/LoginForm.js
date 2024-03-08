@@ -6,7 +6,6 @@ import logo from "../../assets/wide_logo.png";
 import { validateEmail } from "../../utils/helpers";
 import { useAuth } from "../AuthContext";
 
-
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,12 +20,12 @@ export default function LoginForm() {
 
     if (!validateEmail(email)) {
       setErrorEmail("Debes de ingresar un email válido.");
-      return
+      return;
     }
 
     if (isEmpty(password)) {
       setErrorPassword("Debes de ingresar tu contraseña.");
-      return
+      return;
     }
     await login({ email, password });
   };
@@ -67,17 +66,15 @@ export default function LoginForm() {
           buttonStyle={[styles.btnText]}
           onPress={onLogin}
         />
-
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 100,
-  },
+  container: {},
   img: {
+    alignSelf: "center",
     margin: "auto",
     width: 200,
     height: 200,

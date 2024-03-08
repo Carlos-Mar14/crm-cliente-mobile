@@ -41,7 +41,6 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     await removeToken();
     setIsLoggedIn(false);
-    navigation.navigate("Login");
   };
 
   const checkAuth = async () => {
@@ -60,7 +59,6 @@ const AuthProvider = ({ children }) => {
     } else {
       setIsLoggedIn(false);
       setLoading(false)
-      navigation.navigate("Login");
     }
   };
 

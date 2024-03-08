@@ -33,7 +33,7 @@ export const StackNavigation = () => {
   )
 
   return (
-    <View style={{ maxWidth: 600, minWidth: 400, margin: 'auto' }}>
+    <View style={{ maxWidth: 600, minWidth: 400, top: 100, alignSelf: "center" }}>
       <LoginForm />
     </View>
   )
