@@ -4,6 +4,7 @@ import { AgendaList } from 'react-native-calendars';
 import { ApiEvent } from './CalendarScreen';
 
 const _AgendaItem = ({ event }: { event: ApiEvent }) => {
+
   const { name, start } = event
   const hour = start.slice(11, 16)
 
@@ -25,10 +26,12 @@ const AgendaItem = React.memo(_AgendaItem);
 
 export const AgendaView = ({ title, events }: { title: string, events: ApiEvent[] }) => {
   const renderItem = useCallback(({ item }) => <AgendaItem event={item} />, []);
-
+  
+  
   return (
+
     <AgendaList
-      sections={[{ title, data: events }]}
+      sections={[{ title, data: events || []}]}
       renderItem={renderItem}
     />
   );

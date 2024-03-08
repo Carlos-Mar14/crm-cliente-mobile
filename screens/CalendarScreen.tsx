@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, BackHandler  } from "react-native";
 import {
   Calendar,
   CalendarProvider,
@@ -9,6 +9,7 @@ import { CustomDayComponent } from "../components/calendar/CustomDayComponent";
 import Toolbar from "../components/common/Toolbar";
 import { api } from "../utils/api";
 import { AgendaView } from "./AgendaView";
+import { subDays, addDays, format} from "date-fns"
 const dateFromIso = (ds: Date | string): string =>
   (ds instanceof Date ? ds.toISOString() : ds).split("T")[0];
 
@@ -103,6 +104,22 @@ export const CalendarScreen = () => {
 
   const isToday = (dateString: string) => dateString === dateFromIso(new Date());
 
+  useEffect(() => {
+    const returnMonth = () => {
+      if(showAgenda){
+        setShowAgenda(false)
+        return true
+      }
+      return false
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      returnMonth
+    )
+    return () => backHandler.remove()
+  }), [showAgenda]
+
+
   return (
     <View style={styles.container}>
       <Toolbar
@@ -110,12 +127,15 @@ export const CalendarScreen = () => {
         rightButtons={[
           // TODO: add icons for buttons
           {
-            title: "Dia anterior",
+            title: "Día anterior",
             style: {
               backgroundColor: 'lightblue',
             },
             onPress: () => {
-
+              const currentDate = new Date(selectedDate)
+              const dayBefore = subDays(currentDate, 1)
+              const dayBeforeString =  format(dayBefore, "yyyy-MM-dd")
+              setSelectedDate(dayBeforeString)
             }
           },
           {
@@ -124,15 +144,24 @@ export const CalendarScreen = () => {
               backgroundColor: 'lightblue',
             },
             onPress: () => {
+              const currentDate = new Date()
+              const today= (currentDate)
+              const todayString = format(today, "yyyy-MM-dd")
+              setSelectedDate(todayString)
             }
           },
           {
-            title: "Dia siguiente",
+            title: "Día siguiente",
             style: {
               backgroundColor: 'lightblue',
             },
             onPress: () => {
+              const currentDate = new Date(selectedDate)
+              // const dyaAfter = addDays(currentDate, 1)
+              // const dayAfterString = format(dyaAfter, "yyyy-MM-dd")
+              // setSelectedDate(dayAfterString)
 
+              setSelectedDate(format(addDays(currentDate,1), "yyyy-MM-dd"))
             }
           }
         ]}
