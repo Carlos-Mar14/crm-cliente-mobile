@@ -1,23 +1,55 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { getToken, refreshToken, removeToken } from '../utils/api';
+import { useNavigation } from '@react-navigation/native';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { api, getToken, refreshToken, removeToken, saveToken } from '../utils/api';
 
+
+interface LoginData {
+  email: string;
+  password: string;
+}
 
 const AuthContext = createContext({
   isLoggedIn: false,
-  loading: false,
+  loading: true,
+  login: (data: LoginData) => { },
   logout: () => { },
 });
 
 const AuthProvider = ({ children }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const login = async (loginData: LoginData) => {
+    setLoading(true)
+    try {
+      const response = await api.post('/token-auth/', loginData);
+      await saveToken(response.data.token);
+      navigation.navigate("Calendar");
+    } catch (error) {
+      Alert.alert("Error", error?.response?.data || error);
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  const logout = async () => {
+    await removeToken();
+    setIsLoggedIn(false);
+    navigation.navigate("Login");
+  };
 
   const checkAuth = async () => {
     setLoading(true)
     const token = await getToken();
     if (token) {
       try {
-        await refreshToken();
+        await refreshToken(token);
         setIsLoggedIn(true);
       } catch (error) {
         setIsLoggedIn(false)
@@ -28,24 +60,21 @@ const AuthProvider = ({ children }) => {
     } else {
       setIsLoggedIn(false);
       setLoading(false)
+      navigation.navigate("Login");
     }
   };
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-
-  const logout = async () => {
-    await removeToken();
-    setIsLoggedIn(false);
-  };
-
   return (
-    <AuthContext.Provider value={{ isLoggedIn, loading, logout }}>
+    <AuthContext.Provider value={{ loading, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export { AuthContext, AuthProvider };
+export default AuthProvider;
+
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+

@@ -1,15 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { StackScreenProps } from "@react-navigation/stack";
-import { RootStackParams } from "../navigations/StackNavigation";
 
-interface Props extends StackScreenProps<RootStackParams, 'HomeScreen'> {}
 
-export const HomeScreen = ({navigation}: Props) => {
+export const HomeScreen = () => {
     return (
-    <View style={styles.input}>
-        <Text>HOME</Text>
-    </View>
+        <View style={styles.input}>
+            <Text>HOME</Text>
+        </View>
     )
 }
 

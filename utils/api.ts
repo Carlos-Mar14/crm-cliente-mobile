@@ -9,7 +9,6 @@ const api = axios.create({
 });
 const TOKEN_KEY = "token";
 
-console.log(API_URL_SERVER)
 
 async function saveToken(token: string) {
   api.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -39,8 +38,7 @@ async function removeToken() {
   }
 }
 
-async function refreshToken() {
-  const token = await getToken()
+async function refreshToken(token: string) {
     const {data} =  await api.post("/token-refresh/", { token });
     await saveToken(data.token);
 }
