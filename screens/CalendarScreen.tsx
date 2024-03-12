@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View, BackHandler  } from "react-native";
 import {
   Calendar,
@@ -54,10 +54,11 @@ export const CalendarScreen = () => {
     const agendaEvents = apiEventsToAgendaEvents(data);
     setEvents(agendaEvents);
   }
-  const onDayPress = (dateString: string) => {
+  const onDayPress = useCallback((dateString) => {
     setSelectedDate(dateString);
     if (!showAgenda && events[dateString]) setShowAgenda(true);
-  };
+   }, [showAgenda, events]);
+   
 
   LocaleConfig.locales["es"] = {
     monthNames: [

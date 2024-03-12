@@ -16,7 +16,7 @@ if (MODE === 'offline') {
 
   api.get = (url) => {
     if (url === '/agent_agenda/agenda/' ) {
-      return new Promise((resolve) => resolve({ data: require('/agenda_events.json') }));
+      return new Promise((resolve) => resolve({ data: require('../agenda_events.json') }));
     }
     console.log(url)
     return new Promise((resolve) => resolve({ data: { } }));
