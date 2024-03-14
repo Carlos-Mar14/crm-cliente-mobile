@@ -19,6 +19,10 @@ if (MODE === 'offline') {
       return new Promise((resolve) => resolve({ data: require('../agenda_events.json') }));
     }
     console.log(url)
+    if (url === '/puntos/'){
+      return new Promise((resolve) => resolve({ data: require('../puntos.json') }));
+    }
+
     return new Promise((resolve) => resolve({ data: { } }));
   }
 }
