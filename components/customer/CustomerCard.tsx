@@ -9,7 +9,15 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Icon } from "react-native-elements";
+import { Table, Row } from "react-native-table-component";
 import { api } from "../../utils/api";
+
+interface ApiResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: SupplyPoint[];
+}
 
 interface SupplyPointEnergy {
   id: number;
@@ -31,8 +39,10 @@ interface SupplyPointEnergy {
 }
 
 interface SupplyPoint {
-  point_luz?: SupplyPointEnergy;
-  point_gas?: SupplyPointEnergy;
+  punto_luz?: SupplyPointEnergy;
+  punto_gas?: SupplyPointEnergy;
+  id: number;
+  full_address: string;
   state: string;
   create_at: string;
   direction: string;
@@ -53,14 +63,21 @@ export const CustomerCard = () => {
   const [showPsField, setShowPsField] = useState(false);
   const [showDoc, setShowDoc] = useState(false);
   const [events, setEvents] = useState<SupplyPoint[]>([]);
+  const [fullAddress, setFullAddress] = useState("");
 
   useEffect(() => {
     getItems();
   }, []);
 
   async function getItems() {
-    const { data }: { data: SupplyPoint[] } = await api.get("/puntos/");
-    setEvents(data);
+    const response = await api.get<ApiResponse>("/puntos/");
+    console.log("Datos obtenidos:", response.data);
+    setEvents(response.data.results);
+    // Establecer el estado fullAddress con el valor de la dirección completa del primer evento
+    if (response.data.results.length > 0) {
+      setFullAddress(response.data.results[0].full_address);
+    }
+    console.log("Datos cargados en el estado:", events);
   }
 
   const handleButtonPress = (estado) => {
@@ -83,6 +100,58 @@ export const CustomerCard = () => {
     setShowDoc(true);
     setShowCommentsField(false);
     setShowPsField(false);
+  };
+
+  const renderSupplyPointsTable = () => {
+    if (!Array.isArray(events)) {
+      return null;
+    }
+    const tableHead = [
+      "CUPS",
+      "Comerc",
+      "Tarifa",
+      "Consumo",
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "Ult. Cambio de comerc",
+      "Fecha Firma",
+      "Estado",
+    ];
+
+    const tableData = events.map((event) => [
+      event.punto_luz?.cups || "",
+      event.punto_luz?.company || "",
+      event.punto_luz?.tarif || "",
+      event.punto_luz?.consumption || "",
+      event.punto_luz?.p1 || "",
+      event.punto_luz?.p2 || "",
+      event.punto_luz?.p3 || "",
+      event.punto_luz?.p4 || "",
+      event.punto_luz?.p5 || "",
+      event.punto_luz?.p6 || "",
+      event.punto_luz?.change_date || "",
+      event.punto_luz?.signature_date || "",
+      event.punto_luz?.status_text || "",
+    ]);
+
+    return (
+      <Table>
+        <Text style={styles.fullAddressText}>{fullAddress}</Text>
+        <Row data={tableHead} style={styles.head} textStyle={styles.text} />
+        {tableData.map((rowData, index) => (
+          <Row
+            key={index}
+            data={rowData}
+            style={[styles.row, index % 2 && { backgroundColor: "#F7F6E7" }]}
+            textStyle={styles.text}
+          />
+        ))}
+      </Table>
+    );
   };
 
   return (
@@ -256,7 +325,7 @@ export const CustomerCard = () => {
       )}
 
       {showPsField && (
-        <View>
+        <View style={styles.psPadre}>
           <View style={styles.psStyle}>
             <Text>Puntos de Suministros</Text>
             <View style={styles.searchAndButtonsContainer}>
@@ -281,21 +350,7 @@ export const CustomerCard = () => {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.psContainer}>
-            <Text style={styles.titlePs}>CUPS</Text>
-            <Text style={styles.titlePs}>Comerc</Text>
-            <Text style={styles.titlePs}>Tarifa</Text>
-            <Text style={styles.titlePs}>Consumo</Text>
-            <Text style={styles.titlePs}>P1</Text>
-            <Text style={styles.titlePs}>P2</Text>
-            <Text style={styles.titlePs}>P3</Text>
-            <Text style={styles.titlePs}>P4</Text>
-            <Text style={styles.titlePs}>P5</Text>
-            <Text style={styles.titlePs}>P6</Text>
-            <Text style={styles.titlePs}>Ult. Cambio de comerc</Text>
-            <Text style={styles.titlePs}>Fecha Firma</Text>
-            <Text style={styles.titlePs}>Estado</Text>
-          </View>
+          <View style={styles.psContainer}>{renderSupplyPointsTable()}</View>
         </View>
       )}
 
@@ -438,6 +493,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
+  psPadre: {
+    marginTop: -20,
+  },
   psStyle: {
     flexDirection: "row",
     alignItems: "center",
@@ -451,13 +509,14 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   psContainer: {
-    borderWidth: 1,
-    borderColor: "#000",
-    padding: 8,
-    marginBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    // borderWidth: 1,
+    // borderColor: "#000",
+    // padding: 8,
+    //marginBottom: 16,
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // alignItems: "center",
+    
   },
   docContainer: {
     borderWidth: 1,
@@ -472,7 +531,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    marginRight: 8,
+    marginRight: 5,
     width: 150,
     borderRadius: 5,
   },
@@ -497,5 +556,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "flex-end",
     justifyContent: "flex-end",
+  },
+  fullAddressText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  head: {
+    height: 20,
+    backgroundColor: "#f1f8",
+  },
+  text: {
+    // margin: 2,
+    // textAlign: "left",
+    fontSize: 12,
+    flex: 1,
+  },
+  row: {
+    height: 40,
+    backgroundColor: "#E7E6",
   },
 });
