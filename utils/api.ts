@@ -23,6 +23,10 @@ if (MODE === 'offline') {
       return new Promise((resolve) => resolve({ data: require('../puntos.json') }));
     }
 
+    if (url === '/ficha/'){
+      return new Promise((resolve) => resolve({ data: require('../ficha.json') }));
+    }
+
     return new Promise((resolve) => resolve({ data: { } }));
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Icon } from "react-native-elements";
-import { Table, Row } from "react-native-table-component";
+import { Table, Row, Cell } from "react-native-table-component";
 import { api } from "../../utils/api";
 
 interface ApiResponse {
@@ -25,15 +25,15 @@ interface SupplyPointEnergy {
   cups: string;
   company: string;
   tarif: string;
-  consumption: number;
+  consumo: number;
   p1: number;
   p2: number;
   p3: number;
   p4: number;
   p5: number;
   p6: number;
-  change_date: string;
-  signature_date: string;
+  fecha_cambio: string;
+  fecha_firma: string;
   status_text: string;
   status: string;
 }
@@ -52,6 +52,25 @@ interface SupplyPoint {
   create_by: string;
 }
 
+interface SheetData {
+  name?: string;
+  agent?: string;
+  operator?: string;
+  last_modified?: string;
+  created_at?: string;
+  status?: string;
+  persona_contacto?: string;
+  email?: string;
+  cargo?: string;
+  schedule?: string;
+  cnae?: string; // CNAE
+  persona_contacto_email?: string;
+  client_type?: string;
+  document_type?: string;
+  dni?: string;
+  factura_en_papel?: string;
+}
+
 export const CustomerCard = () => {
   const [nameClient, setnameClient] = useState("");
   const [statusClient, setstatusClient] = useState("");
@@ -64,20 +83,34 @@ export const CustomerCard = () => {
   const [showDoc, setShowDoc] = useState(false);
   const [events, setEvents] = useState<SupplyPoint[]>([]);
   const [fullAddress, setFullAddress] = useState("");
+  const [customerFile, setCustomerFile] = useState<SheetData | null>(null);
 
   useEffect(() => {
     getItems();
+    getFichaItems();
   }, []);
 
   async function getItems() {
     const response = await api.get<ApiResponse>("/puntos/");
     console.log("Datos obtenidos:", response.data);
     setEvents(response.data.results);
-    // Establecer el estado fullAddress con el valor de la dirección completa del primer evento
     if (response.data.results.length > 0) {
       setFullAddress(response.data.results[0].full_address);
     }
     console.log("Datos cargados en el estado:", events);
+  }
+
+  async function getFichaItems() {
+    try {
+      const response = await api.get<SheetData>("/ficha/");
+      console.log("Datos obtenidos de /ficha/:", response.data);
+      setCustomerFile(response.data);
+      setSelectedClientType(response.data.client_type);
+      setstatusClient(response.data.status);
+    } catch (error) {
+      console.error("Error al obtener los datos de /ficha/:", error);
+      setCustomerFile(null);
+    }
   }
 
   const handleButtonPress = (estado) => {
@@ -106,6 +139,7 @@ export const CustomerCard = () => {
     if (!Array.isArray(events)) {
       return null;
     }
+
     const tableHead = [
       "CUPS",
       "Comerc",
@@ -122,31 +156,56 @@ export const CustomerCard = () => {
       "Estado",
     ];
 
-    const tableData = events.map((event) => [
-      event.punto_luz?.cups || "",
-      event.punto_luz?.company || "",
-      event.punto_luz?.tarif || "",
-      event.punto_luz?.consumption || "",
-      event.punto_luz?.p1 || "",
-      event.punto_luz?.p2 || "",
-      event.punto_luz?.p3 || "",
-      event.punto_luz?.p4 || "",
-      event.punto_luz?.p5 || "",
-      event.punto_luz?.p6 || "",
-      event.punto_luz?.change_date || "",
-      event.punto_luz?.signature_date || "",
-      event.punto_luz?.status_text || "",
-    ]);
+    const tableData = events.flatMap((event) => {
+      const rows = [];
+      if (event.punto_luz) {
+        rows.push([
+          event.punto_luz.cups,
+          event.punto_luz.company,
+          event.punto_luz.tarif,
+          event.punto_luz.consumo,
+          event.punto_luz.p1,
+          event.punto_luz.p2,
+          event.punto_luz.p3,
+          event.punto_luz.p4,
+          event.punto_luz.p5,
+          event.punto_luz.p6,
+          event.punto_luz.fecha_cambio,
+          event.punto_luz.fecha_firma,
+          event.punto_luz.status_text,
+        ]);
+      }
+      if (event.punto_gas) {
+        rows.push([
+          event.punto_gas.cups,
+          event.punto_gas.company,
+          event.punto_gas.tarif,
+          event.punto_gas.consumo,
+          event.punto_gas.p1,
+          event.punto_gas.p2,
+          event.punto_gas.p3,
+          event.punto_gas.p4,
+          event.punto_gas.p5,
+          event.punto_gas.p6,
+          event.punto_gas.fecha_cambio,
+          event.punto_gas.fecha_firma,
+          event.punto_gas.status_text,
+        ]);
+      }
+      return rows;
+    });
 
     return (
       <Table>
-        <Text style={styles.fullAddressText}>{fullAddress}</Text>
         <Row data={tableHead} style={styles.head} textStyle={styles.text} />
-        {tableData.map((rowData, index) => (
+        {tableData.map((rowData, rowIndex) => (
           <Row
-            key={index}
+            key={rowIndex}
             data={rowData}
-            style={[styles.row, index % 2 && { backgroundColor: "#F7F6E7" }]}
+            style={{
+              ...styles.row,
+              backgroundColor: rowIndex % 2 ? "#F7F6E7" : "transparent",
+            }}
             textStyle={styles.text}
           />
         ))}
@@ -156,145 +215,151 @@ export const CustomerCard = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.inputClient}
-          onChangeText={setnameClient}
-          value={nameClient}
-          placeholder="Nombre Cliente/Titular"
-        />
-        <View style={styles.statusClient}>
-          <Text style={styles.estadoText}>Estado:</Text>
-          <Text style={styles.estadoText}>{statusClient}</Text>
-          <TextInput style={styles.textInput} editable={false} value="Agente" />
+      {customerFile && (
+        <View style={styles.inputContainer}>
           <TextInput
-            style={styles.textInput}
-            editable={false}
-            value="Operador"
+            style={styles.inputClient}
+            onChangeText={setnameClient}
+            value={customerFile.name}
+            placeholder="Nombre Cliente/Titular"
           />
-          <TextInput
-            style={styles.textInput}
-            editable={false}
-            value="Fecha ultimo cambio"
-          />
-          <TextInput
-            style={styles.textInput}
-            editable={false}
-            value="Fecha de vencimiento"
-          />
+          <View style={styles.statusClient}>
+            <Text style={styles.estadoText}>Estado:</Text>
+            <Text style={styles.estadoText}>{statusClient}</Text>
+            <TextInput style={styles.textInput} value={customerFile.agent} />
+            <TextInput style={styles.textInput} value={customerFile.operator} />
+            <TextInput
+              style={styles.textInput}
+              value={customerFile.last_modified}
+            />
+            <TextInput
+              style={styles.textInput}
+              value={customerFile.created_at}
+            />
+          </View>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(0, 128, 0, 0.7)" },
+              ]}
+              onPress={() => handleButtonPress("Firmado")}
+            >
+              <Text style={styles.buttonText}>Firmado</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(255, 128, 0, 0.9)" },
+              ]}
+              onPress={() => handleButtonPress("Aplazada con fecha")}
+            >
+              <Text style={styles.buttonText}>Aplazada con fecha</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(0, 82, 255, 0.9))" },
+              ]}
+              onPress={() => handleButtonPress("Proceso de aceptacion")}
+            >
+              <Text style={styles.buttonText}>Proceso de aceptacion</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(0, 82, 255, 0.9)" },
+              ]}
+              onPress={() => handleButtonPress("Estudio enviado")}
+            >
+              <Text style={styles.buttonText}>Estudio enviado</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(255, 0, 0, 0.8)" },
+              ]}
+              onPress={() => handleButtonPress("Mal Contacto")}
+            >
+              <Text style={styles.buttonText}>Mal Contacto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.buttonStyle,
+                { backgroundColor: "rgba(255, 0, 0, 0.8)" },
+              ]}
+              onPress={() => handleButtonPress("No firmado")}
+            >
+              <Text style={styles.buttonText}>No firmado</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(0, 128, 0, 0.7)" },
-            ]}
-            onPress={() => handleButtonPress("Firmado")}
-          >
-            <Text style={styles.buttonText}>Firmado</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(255, 128, 0, 0.9)" },
-            ]}
-            onPress={() => handleButtonPress("Aplazada con fecha")}
-          >
-            <Text style={styles.buttonText}>Aplazada con fecha</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(0, 82, 255, 0.9))" },
-            ]}
-            onPress={() => handleButtonPress("Proceso de aceptacion")}
-          >
-            <Text style={styles.buttonText}>Proceso de aceptacion</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(0, 82, 255, 0.9)" },
-            ]}
-            onPress={() => handleButtonPress("Estudio enviado")}
-          >
-            <Text style={styles.buttonText}>Estudio enviado</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(255, 0, 0, 0.8)" },
-            ]}
-            onPress={() => handleButtonPress("Mal Contacto")}
-          >
-            <Text style={styles.buttonText}>Mal Contacto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonStyle,
-              { backgroundColor: "rgba(255, 0, 0, 0.8)" },
-            ]}
-            onPress={() => handleButtonPress("No firmado")}
-          >
-            <Text style={styles.buttonText}>No firmado</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      )}
       <View style={styles.horizontalLine} />
-
-      <View style={styles.inputRow}>
-        <TextInput style={styles.input} placeholder="Persona de contacto" />
-        <TextInput style={styles.input} placeholder="Email Interlocutor" />
-        <TextInput style={styles.input} placeholder="Cargo" />
-        <TextInput style={styles.input} placeholder="Horario" />
-        <TextInput style={styles.input} placeholder="CNAE" />
-      </View>
+      {customerFile && (
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder={customerFile.persona_contacto}
+          />
+          <TextInput style={styles.input} placeholder={customerFile.email} />
+          <TextInput style={styles.input} placeholder={customerFile.cargo} />
+          <TextInput style={styles.input} placeholder={customerFile.schedule} />
+          <TextInput style={styles.input} placeholder={customerFile.cnae} />
+        </View>
+      )}
       <View style={styles.horizontalLine} />
 
       <Text>Datos del Cliente</Text>
-      <View style={styles.inputRow}>
-        <TextInput style={styles.inputDateClient} placeholder="Email cliente" />
 
-        <Picker
-          selectedValue={selectedClientType}
-          style={styles.inputDateClientPicker}
-          onValueChange={(itemValue, itemIndex) =>
-            setSelectedClientType(itemValue)
-          }
-        >
-          <Picker.Item label="Tipo de cliente" value="" />
-          <Picker.Item label="Cliente A" value="A" />
-          <Picker.Item label="Cliente B" value="B" />
-          <Picker.Item label="Cliente C" value="C" />
-        </Picker>
-
-        <Picker
-          selectedValue={selectedDocumentType}
-          style={styles.inputDateClientPicker}
-          onValueChange={(itemValue, itemIndex) =>
-            setSelectedDocumentType(itemValue)
-          }
-        >
-          <Picker.Item label="Tipo de documento" value="" />
-          <Picker.Item label="DNI" value="DNI" />
-          <Picker.Item label="Pasaporte" value="Pasaporte" />
-          <Picker.Item
-            label="Carnet de Extranjería"
-            value="Carnet de Extranjería"
+      {customerFile && (
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.inputDateClient}
+            placeholder={customerFile.persona_contacto_email}
           />
-        </Picker>
-        <TextInput style={styles.input} placeholder="Numero de documento" />
-        <Picker
-          selectedValue={selectedDate}
-          style={styles.inputDateClientPicker}
-          onValueChange={(itemValue, itemIndex) => setSelectedDate(itemValue)}
-        >
-          <Picker.Item label="Factura pap..." value="" />
-          <Picker.Item label="Si" value="Si" />
-          <Picker.Item label="No" value="No" />
-        </Picker>
-      </View>
 
+          <Picker
+            selectedValue={selectedClientType}
+            style={styles.inputDateClientPicker}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedClientType(itemValue)
+            }
+          >
+            <Picker.Item label="Tipo de cliente" value="" />
+            <Picker.Item label="Cliente J" value="J" />
+          </Picker>
+
+          <Picker
+            selectedValue={selectedDocumentType}
+            style={styles.inputDateClientPicker}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedDocumentType(itemValue)
+            }
+          >
+            <Picker.Item label="Tipo de documento" value="" />
+            <Picker.Item label="DNI" value="DNI" />
+            <Picker.Item label="Pasaporte" value="Pasaporte" />
+            <Picker.Item
+              label="Carnet de Extranjería"
+              value="Carnet de Extranjería"
+            />
+          </Picker>
+          <TextInput style={styles.input} placeholder={customerFile.dni} />
+          <Picker
+            selectedValue={selectedDate}
+            style={styles.inputDateClientPicker}
+            onValueChange={(itemValue, itemIndex) => setSelectedDate(itemValue)}
+          >
+            <Picker.Item
+              label="Factura pap..."
+              value={customerFile.factura_en_papel}
+            />
+            <Picker.Item label="Si" value="Si" />
+            <Picker.Item label="No" value="No" />
+          </Picker>
+        </View>
+      )}
       <View style={styles.horizontalLine} />
 
       <Text>Observaciones</Text>
@@ -516,7 +581,6 @@ const styles = StyleSheet.create({
     // flexDirection: "row",
     // justifyContent: "space-between",
     // alignItems: "center",
-    
   },
   docContainer: {
     borderWidth: 1,
@@ -566,13 +630,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f8",
   },
   text: {
-    // margin: 2,
-    // textAlign: "left",
     fontSize: 12,
     flex: 1,
+    textAlign: "center",
   },
   row: {
     height: 40,
+    //width: 100,
     backgroundColor: "#E7E6",
+    flexDirection: "row",
+  },
+  cell: {
+    flex: 1,
   },
 });
