@@ -22,9 +22,10 @@ export type RootDrawerParams = {
 const Drawer = createDrawerNavigator<RootDrawerParams>();
 
 export const DrawerNavigation = () => {
+  const { isLoggedIn } = useAuth();
   return (
     <Drawer.Navigator
-      screenOptions={{ headerShown: true }}
+      screenOptions={{ headerShown: isLoggedIn }}
       drawerContent={DrawerContent}
     >
       <Drawer.Screen name="Home" component={StackNavigation} />
@@ -41,7 +42,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
       "Cerrar sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
       [
-        { text: "No", style: "cancel", onPress: () => {} },
+        { text: "No", style: "cancel", onPress: () => { } },
         {
           text: "Sí",
           style: "destructive",
