@@ -52,10 +52,20 @@ interface SupplyPoint {
   create_by: string;
 }
 
+interface CustomerPhones {
+  id?: number;
+  value: string;
+  desc: null;
+  card_id: number;
+  card_name: string;
+}
+
 interface SheetData {
+  id?: number;
   name?: string;
   agent?: string;
   operator?: string;
+  phone?: CustomerPhones;
   last_modified?: string;
   created_at?: string;
   status?: string;
@@ -83,11 +93,12 @@ export const CustomerCard = () => {
   const [showDoc, setShowDoc] = useState(false);
   const [events, setEvents] = useState<SupplyPoint[]>([]);
   const [fullAddress, setFullAddress] = useState("");
+  const [idSheet, setIdSheet] = useState("");
   const [customerFile, setCustomerFile] = useState<SheetData | null>(null);
 
   useEffect(() => {
     getItems();
-    getFichaItems();
+    getSheetItems();
   }, []);
 
   async function getItems() {
@@ -96,17 +107,19 @@ export const CustomerCard = () => {
     setEvents(response.data.results);
     if (response.data.results.length > 0) {
       setFullAddress(response.data.results[0].full_address);
+      setIdSheet(response.data[0].id)
     }
     console.log("Datos cargados en el estado:", events);
   }
 
-  async function getFichaItems() {
+  async function getSheetItems() {
     try {
       const response = await api.get<SheetData>("/ficha/");
       console.log("Datos obtenidos de /ficha/:", response.data);
       setCustomerFile(response.data);
       setSelectedClientType(response.data.client_type);
       setstatusClient(response.data.status);
+      setIdSheet(response.data.id[0]);
     } catch (error) {
       console.error("Error al obtener los datos de /ficha/:", error);
       setCustomerFile(null);
@@ -133,6 +146,16 @@ export const CustomerCard = () => {
     setShowDoc(true);
     setShowCommentsField(false);
     setShowPsField(false);
+  };
+
+  const statusColors = {
+    Firmado: "rgba(0, 128, 0, 0.7)",
+    "Aplazada con fecha": "rgba(255, 128, 0, 0.9)",
+    "Proceso de aceptacion": "rgba(0, 82, 255, 0.9)",
+    "Estudio enviado": "rgba(0, 82, 255, 0.9)",
+    "Mal Contacto": "rgba(255, 0, 0, 0.8)",
+    "No firmado": "rgba(255, 0, 0, 0.8)",
+    "Proceso aceptacion": "rgba(0, 82, 255, 0.9)",
   };
 
   const renderSupplyPointsTable = () => {
@@ -215,23 +238,41 @@ export const CustomerCard = () => {
 
   return (
     <View style={styles.container}>
+      {idSheet && (
+            <Text style={styles.fullAddressText}>{idSheet}</Text>
+          )}
       {customerFile && (
         <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputClient}
-            onChangeText={setnameClient}
-            value={customerFile.name}
-            placeholder="Nombre Cliente/Titular"
-          />
+          <View style={styles.titleInputContainer}>
+            <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
+            <TextInput
+              style={styles.inputClient}
+              onChangeText={setnameClient}
+              value={customerFile.name}
+              placeholder="Escribe el nombre..."
+            />
+          </View>
           <View style={styles.statusClient}>
             <Text style={styles.estadoText}>Estado:</Text>
-            <Text style={styles.estadoText}>{statusClient}</Text>
+            <Text
+              style={[
+                styles.estadoText,
+                { backgroundColor: statusColors[statusClient] },
+              ]}
+            >
+              {statusClient}
+            </Text>
+            <Text style={{ fontWeight: "bold" }}>Nombre Agente</Text>
             <TextInput style={styles.textInput} value={customerFile.agent} />
+            <Text style={{ fontWeight: "bold" }}>Operador</Text>
             <TextInput style={styles.textInput} value={customerFile.operator} />
+            <Text style={{ fontWeight: "bold" }}>Ultimo Cambio</Text>
             <TextInput
               style={styles.textInput}
               value={customerFile.last_modified}
+              editable={false}
             />
+            <Text style={{ fontWeight: "bold" }}>Fecha Vencimiento</Text>
             <TextInput
               style={styles.textInput}
               value={customerFile.created_at}
@@ -298,19 +339,37 @@ export const CustomerCard = () => {
       <View style={styles.horizontalLine} />
       {customerFile && (
         <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder={customerFile.persona_contacto}
-          />
-          <TextInput style={styles.input} placeholder={customerFile.email} />
-          <TextInput style={styles.input} placeholder={customerFile.cargo} />
-          <TextInput style={styles.input} placeholder={customerFile.schedule} />
-          <TextInput style={styles.input} placeholder={customerFile.cnae} />
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>Persona de contacto</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={customerFile.persona_contacto}
+            />
+          </View>
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>Email Interlocutor</Text>
+            <TextInput style={styles.input} placeholder={customerFile.email} />
+          </View>
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>Cargo</Text>
+            <TextInput style={styles.input} placeholder={customerFile.cargo} />
+          </View>
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>Horario</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={customerFile.schedule}
+            />
+          </View>
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>CNAE</Text>
+            <TextInput style={styles.input} placeholder={customerFile.cnae} />
+          </View>
         </View>
       )}
       <View style={styles.horizontalLine} />
 
-      <Text>Datos del Cliente</Text>
+      <Text style={{ fontWeight: "bold" }}>Datos del Cliente</Text>
 
       {customerFile && (
         <View style={styles.inputRow}>
@@ -318,7 +377,6 @@ export const CustomerCard = () => {
             style={styles.inputDateClient}
             placeholder={customerFile.persona_contacto_email}
           />
-
           <Picker
             selectedValue={selectedClientType}
             style={styles.inputDateClientPicker}
@@ -345,7 +403,10 @@ export const CustomerCard = () => {
               value="Carnet de Extranjería"
             />
           </Picker>
-          <TextInput style={styles.input} placeholder={customerFile.dni} />
+          <View style={styles.titleClientContactContainer}>
+            <Text style={{ fontWeight: "bold" }}>Numero de documento</Text>
+            <TextInput style={styles.input} placeholder={customerFile.dni} />
+          </View>
           <Picker
             selectedValue={selectedDate}
             style={styles.inputDateClientPicker}
@@ -362,7 +423,7 @@ export const CustomerCard = () => {
       )}
       <View style={styles.horizontalLine} />
 
-      <Text>Observaciones</Text>
+      <Text style={{ fontWeight: "bold" }}>Observaciones</Text>
 
       <View style={styles.horizontalLine} />
 
@@ -392,7 +453,7 @@ export const CustomerCard = () => {
       {showPsField && (
         <View style={styles.psPadre}>
           <View style={styles.psStyle}>
-            <Text>Puntos de Suministros</Text>
+            <Text style={{ fontWeight: "bold" }}>Puntos de Suministros</Text>
             <View style={styles.searchAndButtonsContainer}>
               <TextInput
                 style={styles.searchInput}
@@ -415,6 +476,9 @@ export const CustomerCard = () => {
               </TouchableOpacity>
             </View>
           </View>
+          {fullAddress && (
+            <Text style={styles.fullAddressText}>{fullAddress}</Text>
+          )}
           <View style={styles.psContainer}>{renderSupplyPointsTable()}</View>
         </View>
       )}
@@ -454,12 +518,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 5,
     flex: 1,
     marginRight: 10,
   },
   inputClient: {
-    height: 40,
+    height: 50,
     borderColor: "gray",
     borderWidth: 1,
     marginRight: 10,
@@ -467,10 +531,18 @@ const styles = StyleSheet.create({
     padding: 10,
     flex: 1,
   },
+  titleInputContainer: {
+    flexDirection: "column",
+    height: 60,
+    //marginRight: 30,
+    alignItems: "center",
+    flex: 1,
+  },
   estadoText: {
     fontSize: 16,
     marginBottom: 10,
     alignContent: "center",
+    fontWeight: "bold",
   },
   statusClient: {
     marginRight: 100,
@@ -481,7 +553,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    marginBottom: 10,
     paddingLeft: 10,
   },
   buttonsContainer: {
@@ -509,11 +580,19 @@ const styles = StyleSheet.create({
     borderBottomColor: "#000",
     borderBottomWidth: 1,
     marginVertical: 10,
+    marginTop: 5,
+    marginBottom: 5
   },
   inputRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+  },
+  titleClientContactContainer: {
+    flex: 1,
+    height: 60,
+    //marginRight: 30,
+    //alignItems: "center",
   },
   input: {
     height: 40,
@@ -624,6 +703,7 @@ const styles = StyleSheet.create({
   fullAddressText: {
     fontSize: 12,
     fontWeight: "bold",
+    marginTop: -20,
   },
   head: {
     height: 20,
