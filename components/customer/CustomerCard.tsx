@@ -11,6 +11,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Icon } from "react-native-elements";
 import { Table, Row, Cell } from "react-native-table-component";
 import { api } from "../../utils/api";
+import { PhoneNumber } from "./PhoneNumber";
 
 interface ApiResponse {
   count: number;
@@ -52,20 +53,13 @@ interface SupplyPoint {
   create_by: string;
 }
 
-interface CustomerPhones {
-  id?: number;
-  value: string;
-  desc: null;
-  card_id: number;
-  card_name: string;
-}
+
 
 interface SheetData {
   id?: number;
   name?: string;
   agent?: string;
   operator?: string;
-  phone?: CustomerPhones;
   last_modified?: string;
   created_at?: string;
   status?: string;
@@ -107,7 +101,6 @@ export const CustomerCard = () => {
     setEvents(response.data.results);
     if (response.data.results.length > 0) {
       setFullAddress(response.data.results[0].full_address);
-      setIdSheet(response.data[0].id)
     }
     console.log("Datos cargados en el estado:", events);
   }
@@ -119,7 +112,9 @@ export const CustomerCard = () => {
       setCustomerFile(response.data);
       setSelectedClientType(response.data.client_type);
       setstatusClient(response.data.status);
-      setIdSheet(response.data.id[0]);
+      if (response.data && response.data.id) {
+        setIdSheet(response.data.id.toString());
+      }
     } catch (error) {
       console.error("Error al obtener los datos de /ficha/:", error);
       setCustomerFile(null);
@@ -239,10 +234,13 @@ export const CustomerCard = () => {
   return (
     <View style={styles.container}>
       {idSheet && (
-            <Text style={styles.fullAddressText}>{idSheet}</Text>
-          )}
+        <Text style={styles.fullAddressText}>
+          Datos de seguimiento Ficha: {idSheet}
+        </Text>
+      )}
       {customerFile && (
         <View style={styles.inputContainer}>
+          <View style={styles.titlePhoneInputContainer}>
           <View style={styles.titleInputContainer}>
             <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
             <TextInput
@@ -252,16 +250,19 @@ export const CustomerCard = () => {
               placeholder="Escribe el nombre..."
             />
           </View>
+          <View><PhoneNumber/></View>
+          </View>
           <View style={styles.statusClient}>
-            <Text style={styles.estadoText}>Estado:</Text>
-            <Text
-              style={[
-                styles.estadoText,
-                { backgroundColor: statusColors[statusClient] },
-              ]}
+            <View
+              style={{
+                backgroundColor: statusColors[statusClient],
+              }}
             >
-              {statusClient}
-            </Text>
+              <Text style={styles.estadoText}>Estado:</Text>
+              <Text style={{ ...styles.estadoText, marginTop: -5 }}>
+                {statusClient}
+              </Text>
+            </View>
             <Text style={{ fontWeight: "bold" }}>Nombre Agente</Text>
             <TextInput style={styles.textInput} value={customerFile.agent} />
             <Text style={{ fontWeight: "bold" }}>Operador</Text>
@@ -369,56 +370,67 @@ export const CustomerCard = () => {
       )}
       <View style={styles.horizontalLine} />
 
-      <Text style={{ fontWeight: "bold" }}>Datos del Cliente</Text>
-
+      <Text style={{ fontWeight: "bold", marginBottom: -15 }}>
+        Datos del Cliente
+      </Text>
       {customerFile && (
-        <View style={styles.inputRow}>
+        <View style={styles.inputRowClient}>
           <TextInput
             style={styles.inputDateClient}
             placeholder={customerFile.persona_contacto_email}
           />
-          <Picker
-            selectedValue={selectedClientType}
-            style={styles.inputDateClientPicker}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedClientType(itemValue)
-            }
-          >
-            <Picker.Item label="Tipo de cliente" value="" />
-            <Picker.Item label="Cliente J" value="J" />
-          </Picker>
-
-          <Picker
-            selectedValue={selectedDocumentType}
-            style={styles.inputDateClientPicker}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedDocumentType(itemValue)
-            }
-          >
-            <Picker.Item label="Tipo de documento" value="" />
-            <Picker.Item label="DNI" value="DNI" />
-            <Picker.Item label="Pasaporte" value="Pasaporte" />
-            <Picker.Item
-              label="Carnet de Extranjería"
-              value="Carnet de Extranjería"
-            />
-          </Picker>
-          <View style={styles.titleClientContactContainer}>
+          <View style={styles.inputPickerTypeDocument}>
+            <Text style={{ fontWeight: "bold", marginTop: -22 }}>
+              Tipo de Cliente
+            </Text>
+            <Picker
+              selectedValue={selectedClientType}
+              style={styles.inputDateClientPicker}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedClientType(itemValue)
+              }
+            >
+              <Picker.Item label="Cliente J" value="J" />
+              <Picker.Item label="Cliente K" value="K" />
+              <Picker.Item label="Cliente M" value="M" />
+            </Picker>
+          </View>
+          <View style={styles.inputPickerTypeDocument}>
+            <Text style={{ fontWeight: "bold", marginTop: -22 }}>
+              Tipo de Documento
+            </Text>
+            <Picker
+              selectedValue={selectedDocumentType}
+              style={styles.inputDateClientPicker}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedDocumentType(itemValue)
+              }
+            >
+              <Picker.Item label="DNI" value="DNI" />
+              <Picker.Item label="Pasaporte" value="Pasaporte" />
+              <Picker.Item
+                label="Carnet de Extranjería"
+                value="Carnet de Extranjería"
+              />
+            </Picker>
+          </View>
+          <View style={styles.containerNumberDocument}>
             <Text style={{ fontWeight: "bold" }}>Numero de documento</Text>
             <TextInput style={styles.input} placeholder={customerFile.dni} />
           </View>
+          <View style={styles.inputPickerTypeDocument}>
+            <Text style={{ fontWeight: "bold", marginTop: -22 }}>
+              Factura en Papel
+            </Text>
           <Picker
             selectedValue={selectedDate}
             style={styles.inputDateClientPicker}
             onValueChange={(itemValue, itemIndex) => setSelectedDate(itemValue)}
           >
-            <Picker.Item
-              label="Factura pap..."
-              value={customerFile.factura_en_papel}
-            />
             <Picker.Item label="Si" value="Si" />
             <Picker.Item label="No" value="No" />
           </Picker>
+          </View>
         </View>
       )}
       <View style={styles.horizontalLine} />
@@ -512,15 +524,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: 100,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     padding: 20,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
     flex: 1,
-    marginRight: 10,
   },
   inputClient: {
     height: 50,
@@ -531,26 +541,31 @@ const styles = StyleSheet.create({
     padding: 10,
     flex: 1,
   },
-  titleInputContainer: {
-    flexDirection: "column",
-    height: 60,
-    //marginRight: 30,
+  titlePhoneInputContainer:{
+    // flexDirection: "column",
+    // height: 60,
     alignItems: "center",
     flex: 1,
   },
+  titleInputContainer: {
+    flexDirection: "column",
+    height: 60,
+    alignItems: "center",
+    // flex: 1,
+  },
   estadoText: {
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 5,
     alignContent: "center",
     fontWeight: "bold",
   },
   statusClient: {
     marginRight: 100,
-    marginLeft: 20,
+    marginLeft: 30,
     flex: 1,
   },
   textInput: {
-    height: 40,
+    height: 30,
     borderColor: "gray",
     borderWidth: 1,
     paddingLeft: 10,
@@ -581,18 +596,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginVertical: 10,
     marginTop: 5,
-    marginBottom: 5
+    marginBottom: 5,
   },
   inputRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+  },
+  inputRowClient: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 5,
   },
   titleClientContactContainer: {
     flex: 1,
     height: 60,
-    //marginRight: 30,
-    //alignItems: "center",
+  },
+  containerNumberDocument: {
+    flex: 1,
+    height: 60,
+    marginTop: -10,
   },
   input: {
     height: 40,
@@ -609,10 +631,23 @@ const styles = StyleSheet.create({
     marginRight: 10,
     flex: 1,
     padding: 10,
+    marginTop: 10,
   },
   inputDateClientPicker: {
     marginRight: 10,
     flex: 1,
+    marginTop: -10,
+  },
+
+  inputPickerTypeDocument: {
+    marginRight: 10,
+    flex: 1,
+    height: 40,
+    marginTop: 10,
+    // padding: 5,
+    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
+    borderColor: "#000", // Define el color del borde
+    borderRadius: 2, // Opcional: Redondea las esquinas del borde
   },
   containerFooterButton: {
     alignItems: "center",
@@ -638,7 +673,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   psPadre: {
-    marginTop: -20,
+    marginTop: -30,
   },
   psStyle: {
     flexDirection: "row",
@@ -653,13 +688,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   psContainer: {
-    // borderWidth: 1,
-    // borderColor: "#000",
-    // padding: 8,
-    //marginBottom: 16,
-    // flexDirection: "row",
-    // justifyContent: "space-between",
-    // alignItems: "center",
+    marginBottom: -16,
   },
   docContainer: {
     borderWidth: 1,
@@ -716,7 +745,6 @@ const styles = StyleSheet.create({
   },
   row: {
     height: 40,
-    //width: 100,
     backgroundColor: "#E7E6",
     flexDirection: "row",
   },

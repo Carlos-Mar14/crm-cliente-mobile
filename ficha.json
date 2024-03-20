@@ -10,6 +10,20 @@
             "desc": null,
             "card_id": 3113611,
             "card_name": "LEE CHOONG HYOUNG"
+        },
+        {
+            "id": 2497042,
+            "value": "0000000",
+            "desc": null,
+            "card_id": 3113611,
+            "card_name": "LEE CHOONG HYOUNG"
+        },
+        {
+            "id": 2497042,
+            "value": "2222222222",
+            "desc": null,
+            "card_id": 3113611,
+            "card_name": "LEE CHOONG HYOUNG"
         }
     ],
     "next_action_date": null,
@@ -38,7 +52,7 @@
     "cargo": "TITULAR",
     "persona_contacto": "LEE CHOONG HYOUNG",
     "persona_contacto_email": "ISAACLEE714@ICLOUD.COM",
-    "factura_en_papel": false,
+    "factura_en_papel": "No",
     "name": "LEE CHOONG HYOUNG",
     "client_type": "J",
     "call_markings": 0,
