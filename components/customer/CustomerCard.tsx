@@ -12,6 +12,7 @@ import { Icon } from "react-native-elements";
 import { Table, Row, Cell } from "react-native-table-component";
 import { api } from "../../utils/api";
 import { PhoneNumber } from "./PhoneNumber";
+import { ComponentSupplyPoint } from "./ComponentSupplyPoint";
 
 interface ApiResponse {
   count: number;
@@ -52,8 +53,6 @@ interface SupplyPoint {
   card: string;
   create_by: string;
 }
-
-
 
 interface SheetData {
   id?: number;
@@ -97,18 +96,18 @@ export const CustomerCard = () => {
 
   async function getItems() {
     const response = await api.get<ApiResponse>("/puntos/");
-    console.log("Datos obtenidos:", response.data);
+    //console.log("Datos obtenidos:", response.data);
     setEvents(response.data.results);
     if (response.data.results.length > 0) {
       setFullAddress(response.data.results[0].full_address);
     }
-    console.log("Datos cargados en el estado:", events);
+    //console.log("Datos cargados en el estado:", events);
   }
 
   async function getSheetItems() {
     try {
       const response = await api.get<SheetData>("/ficha/");
-      console.log("Datos obtenidos de /ficha/:", response.data);
+      //console.log("Datos obtenidos de /ficha/:", response.data);
       setCustomerFile(response.data);
       setSelectedClientType(response.data.client_type);
       setstatusClient(response.data.status);
@@ -116,7 +115,7 @@ export const CustomerCard = () => {
         setIdSheet(response.data.id.toString());
       }
     } catch (error) {
-      console.error("Error al obtener los datos de /ficha/:", error);
+      //console.error("Error al obtener los datos de /ficha/:", error);
       setCustomerFile(null);
     }
   }
@@ -241,16 +240,18 @@ export const CustomerCard = () => {
       {customerFile && (
         <View style={styles.inputContainer}>
           <View style={styles.titlePhoneInputContainer}>
-          <View style={styles.titleInputContainer}>
-            <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
-            <TextInput
-              style={styles.inputClient}
-              onChangeText={setnameClient}
-              value={customerFile.name}
-              placeholder="Escribe el nombre..."
-            />
-          </View>
-          <View><PhoneNumber/></View>
+            <View style={styles.titleInputContainer}>
+              <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
+              <TextInput
+                style={styles.inputClient}
+                onChangeText={setnameClient}
+                value={customerFile.name}
+                placeholder="Escribe el nombre..."
+              />
+            </View>
+            <View>
+              <PhoneNumber />
+            </View>
           </View>
           <View style={styles.statusClient}>
             <View
@@ -422,14 +423,16 @@ export const CustomerCard = () => {
             <Text style={{ fontWeight: "bold", marginTop: -22 }}>
               Factura en Papel
             </Text>
-          <Picker
-            selectedValue={selectedDate}
-            style={styles.inputDateClientPicker}
-            onValueChange={(itemValue, itemIndex) => setSelectedDate(itemValue)}
-          >
-            <Picker.Item label="Si" value="Si" />
-            <Picker.Item label="No" value="No" />
-          </Picker>
+            <Picker
+              selectedValue={selectedDate}
+              style={styles.inputDateClientPicker}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedDate(itemValue)
+              }
+            >
+              <Picker.Item label="Si" value="Si" />
+              <Picker.Item label="No" value="No" />
+            </Picker>
           </View>
         </View>
       )}
@@ -477,8 +480,7 @@ export const CustomerCard = () => {
                 style={styles.roundButton}
                 onPress={() => console.log("Agregar")}
               >
-                <Text> + </Text>
-                {/* <Icon name="plus" size={20} color="#FFF" /> */}
+                <ComponentSupplyPoint />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.roundButton}
@@ -541,7 +543,7 @@ const styles = StyleSheet.create({
     padding: 10,
     flex: 1,
   },
-  titlePhoneInputContainer:{
+  titlePhoneInputContainer: {
     // flexDirection: "column",
     // height: 60,
     alignItems: "center",
@@ -736,19 +738,26 @@ const styles = StyleSheet.create({
   },
   head: {
     height: 20,
-    backgroundColor: "#f1f8",
+    // backgroundColor: "#FF0000",
+    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
+    borderColor: "#000",
+    width: "100%",
   },
   text: {
     fontSize: 12,
     flex: 1,
-    textAlign: "center",
+    textAlign: "left",
+    // marginLeft: -40,
+    // width: 100,
+    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
+    borderColor: "#FF0000",
   },
   row: {
     height: 40,
-    backgroundColor: "#E7E6",
     flexDirection: "row",
   },
   cell: {
-    flex: 1,
+    // flex: 1,
+    borderWidth: 1,
   },
 });
