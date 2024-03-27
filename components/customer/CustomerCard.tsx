@@ -38,6 +38,7 @@ interface SupplyPointEnergy {
   fecha_firma: string;
   status_text: string;
   status: string;
+  firma: string;
 }
 
 interface SupplyPoint {
@@ -171,6 +172,7 @@ export const CustomerCard = () => {
       "Ult. Cambio de comerc",
       "Fecha Firma",
       "Estado",
+      "",
     ];
 
     const tableData = events.flatMap((event) => {
@@ -190,6 +192,7 @@ export const CustomerCard = () => {
           event.punto_luz.fecha_cambio,
           event.punto_luz.fecha_firma,
           event.punto_luz.status_text,
+          event.punto_luz.firma,
         ]);
       }
       if (event.punto_gas) {
@@ -207,6 +210,7 @@ export const CustomerCard = () => {
           event.punto_gas.fecha_cambio,
           event.punto_gas.fecha_firma,
           event.punto_gas.status_text,
+          event.punto_gas.firma,
         ]);
       }
       return rows;
@@ -214,16 +218,26 @@ export const CustomerCard = () => {
 
     return (
       <Table>
-        <Row data={tableHead} style={styles.head} textStyle={styles.text} />
+        <Row
+          data={tableHead.map((headItem) => (
+            <Text style={styles.headText}>{headItem}</Text>
+          ))}
+          style={styles.head}
+          widthArr={[
+            190, 190, 60, 80, 30, 30, 30, 30, 30, 30, 180, 100, 130, 100,
+          ]}
+        />
+
         {tableData.map((rowData, rowIndex) => (
           <Row
             key={rowIndex}
-            data={rowData}
-            style={{
-              ...styles.row,
-              backgroundColor: rowIndex % 2 ? "#F7F6E7" : "transparent",
-            }}
-            textStyle={styles.text}
+            data={rowData.map((cellData, cellIndex) => (
+              <Text style={styles.textInCell}>{cellData}</Text>
+            ))}
+            style={styles.row}
+            widthArr={[
+              190, 190, 60, 80, 30, 30, 30, 30, 30, 30, 180, 100, 130, 100,
+            ]}
           />
         ))}
       </Table>
@@ -449,7 +463,26 @@ export const CustomerCard = () => {
           <Button title="DOC" onPress={handleDocButtonPress} />
         </View>
       </View>
-
+      <View style={styles.searchAndButtonsContainer}>
+        <TextInput
+          style={styles.searchInput}
+          // onChangeText={} // UseState = set
+          // value={} //UseSate
+          placeholder="Buscar por CUPS"
+        />
+        <TouchableOpacity
+          style={styles.roundButton}
+          onPress={() => console.log("Agregar")}
+        >
+          <ComponentSupplyPoint />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.roundButton}
+          onPress={() => console.log("Actualizar")}
+        >
+          <Icon name="refresh" size={20} color="#FFF" />
+        </TouchableOpacity>
+      </View>
       {showCommentsField && (
         <View style={styles.commentsContainer}>
           <TextInput
@@ -467,32 +500,32 @@ export const CustomerCard = () => {
 
       {showPsField && (
         <View style={styles.psPadre}>
+          <Text style={{ fontWeight: "bold", marginBottom: -10 }}>
+            Puntos de Suministros
+          </Text>
           <View style={styles.psStyle}>
-            <Text style={{ fontWeight: "bold" }}>Puntos de Suministros</Text>
-            <View style={styles.searchAndButtonsContainer}>
-              <TextInput
-                style={styles.searchInput}
-                // onChangeText={} // UseState = set
-                // value={} //UseSate
-                placeholder="Buscar por CUPS"
-              />
-              <TouchableOpacity
-                style={styles.roundButton}
-                onPress={() => console.log("Agregar")}
-              >
-                <ComponentSupplyPoint />
+            <View style={styles.optionsCups}>
+              <TouchableOpacity>
+                <Text style={styles.buttonAddCups}>AÑADIR CUPS</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.roundButton}
+                style={styles.buttonCups}
                 onPress={() => console.log("Actualizar")}
               >
-                <Icon name="refresh" size={20} color="#FFF" />
+                <Icon name="east" size={18} color="#ff8000" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonCupsAdd}
+                onPress={() => console.log("Actualizar")}
+              >
+                <Icon name="add" size={18} color="#007BFF" />
               </TouchableOpacity>
             </View>
           </View>
           {fullAddress && (
             <Text style={styles.fullAddressText}>{fullAddress}</Text>
           )}
+
           <View style={styles.psContainer}>{renderSupplyPointsTable()}</View>
         </View>
       )}
@@ -532,7 +565,8 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
+    // flex: 1,
+    height: 270,
   },
   inputClient: {
     height: 50,
@@ -544,8 +578,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titlePhoneInputContainer: {
-    // flexDirection: "column",
-    // height: 60,
     alignItems: "center",
     flex: 1,
   },
@@ -553,7 +585,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     height: 60,
     alignItems: "center",
-    // flex: 1,
   },
   estadoText: {
     fontSize: 16,
@@ -603,6 +634,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 0,
   },
   inputRowClient: {
     flexDirection: "row",
@@ -646,10 +678,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     marginTop: 10,
-    // padding: 5,
-    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
-    borderColor: "#000", // Define el color del borde
-    borderRadius: 2, // Opcional: Redondea las esquinas del borde
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 2,
   },
   containerFooterButton: {
     alignItems: "center",
@@ -675,22 +706,64 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   psPadre: {
-    marginTop: -30,
+    height: 130,
   },
   psStyle: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
-  searchAndButtonsContainer: {
+  optionsCups: {
+    borderColor: "#000",
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: -5,
+    marginLeft: 740,
+    width: 250,
+    height: 30,
+  },
+  buttonAddCups: {
+    color: "#008000",
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: "#008000",
+    width: 110,
+    height: 25,
+    textAlign: "center",
+    marginRight: 20,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  buttonCups: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    borderColor: "#ff8000",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 40,
-    flex: 1,
-    justifyContent: "flex-end",
+  },
+  buttonCupsAdd: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    borderColor: "#007BFF",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchAndButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end", // Esto mueve los elementos a la derecha
+    alignItems: "flex-end", // Esto alinea los elementos en la parte inferior
+    width: 260,
+    marginTop: -30,
+    marginLeft: 980,
   },
   psContainer: {
-    marginBottom: -16,
+    marginBottom: 15,
+    justifyContent: "space-between",
   },
   docContainer: {
     borderWidth: 1,
@@ -735,29 +808,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     marginTop: -20,
+    width: 650,
   },
   head: {
-    height: 20,
-    // backgroundColor: "#FF0000",
-    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
+    borderWidth: 0.4,
     borderColor: "#000",
-    width: "100%",
-  },
-  text: {
-    fontSize: 12,
-    flex: 1,
-    textAlign: "left",
-    // marginLeft: -40,
-    // width: 100,
-    borderWidth: 1, // Agrega un borde de 1 píxel de ancho
-    borderColor: "#FF0000",
   },
   row: {
-    height: 40,
-    flexDirection: "row",
+    height: 30,
+    borderWidth: 0.4,
+    borderColor: "#000",
+
+    alignItems: "center",
+    justifyContent: "center",
   },
-  cell: {
-    // flex: 1,
-    borderWidth: 1,
+  textInCell: {
+    textAlign: "center",
+  },
+  headText: {
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
