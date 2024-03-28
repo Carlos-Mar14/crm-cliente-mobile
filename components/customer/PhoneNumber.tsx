@@ -255,7 +255,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     marginTop: 10,
-    // borderWidth: 1,
   },
   buttonsContainer: {
     marginBottom: 10,
@@ -274,7 +273,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 100,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -288,14 +287,16 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
+    fontWeight: "bold",
   },
   modalInput: {
     marginBottom: 15,
-    width: "100%",
+    width: 250,
     borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,
+    textAlign: "center",
   },
   closeButton: {
     position: "absolute",
@@ -305,7 +306,6 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    // width: "100%",
   },
   buttonText: {
     fontSize: 15,
@@ -322,25 +322,23 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     margin: 5,
     borderWidth: 1,
-    borderColor: "#000",
+    borderColor: "#000000",
     borderRadius: 3,
     height: 30,
     width: 145,
     flexDirection: "row",
+    marginLeft: 70,
   },
   phoneText: {
     marginEnd: 10,
   },
   phoneAndNoteContainer: {
     flexDirection: "row",
-    marginRight: 20,
+    marginRight: 15,
   },
   noteText: {
     marginRight: 40,
     fontSize: 14,
-    // backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "#000",
     width: 50,
     height: 20,
     textAlign: "center",

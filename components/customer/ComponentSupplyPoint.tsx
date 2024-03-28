@@ -25,7 +25,7 @@ export const ComponentSupplyPoint = () => {
   return (
     <View>
       <TouchableOpacity onPress={openModal}>
-        <Icon name="add" size={20} color="#FFF" />
+        <Icon name="add" size={20} color="#008000" />
       </TouchableOpacity>
       <Modal
         animationType="slide"

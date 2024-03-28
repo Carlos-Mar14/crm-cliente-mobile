@@ -84,6 +84,7 @@ export const CustomerCard = () => {
   const [showCommentsField, setShowCommentsField] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [showPsField, setShowPsField] = useState(false);
+  const [showPsSection, setShowPsSection] = useState(false);
   const [showDoc, setShowDoc] = useState(false);
   const [events, setEvents] = useState<SupplyPoint[]>([]);
   const [fullAddress, setFullAddress] = useState("");
@@ -129,18 +130,21 @@ export const CustomerCard = () => {
     setShowCommentsField(true);
     setShowPsField(false);
     setShowDoc(false);
+    setShowPsSection(false);
   };
 
   const handlePsButtonPress = () => {
     setShowPsField(true);
     setShowCommentsField(false);
     setShowDoc(false);
+    setShowPsSection(true);
   };
 
   const handleDocButtonPress = () => {
     setShowDoc(true);
     setShowCommentsField(false);
     setShowPsField(false);
+    setShowPsSection(false);
   };
 
   const statusColors = {
@@ -271,10 +275,17 @@ export const CustomerCard = () => {
             <View
               style={{
                 backgroundColor: statusColors[statusClient],
+                marginTop: -3,
               }}
             >
               <Text style={styles.estadoText}>Estado:</Text>
-              <Text style={{ ...styles.estadoText, marginTop: -5 }}>
+              <Text
+                style={{
+                  ...styles.estadoText,
+                  marginTop: -13,
+                  marginBottom: -1,
+                }}
+              >
                 {statusClient}
               </Text>
             </View>
@@ -356,9 +367,11 @@ export const CustomerCard = () => {
       {customerFile && (
         <View style={styles.inputRow}>
           <View style={styles.titleClientContactContainer}>
-            <Text style={{ fontWeight: "bold" }}>Persona de contacto</Text>
+            <Text style={{ fontWeight: "bold", marginLeft: -25 }}>
+              Persona de contacto
+            </Text>
             <TextInput
-              style={styles.input}
+              style={styles.namePersonContac}
               placeholder={customerFile.persona_contacto}
             />
           </View>
@@ -452,8 +465,10 @@ export const CustomerCard = () => {
       )}
       <View style={styles.horizontalLine} />
 
-      <Text style={{ fontWeight: "bold" }}>Observaciones</Text>
-
+      <View>
+        <Text style={{ fontWeight: "bold" }}>Observaciones</Text>
+        <TextInput placeholder="Observaciones..."></TextInput>
+      </View>
       <View style={styles.horizontalLine} />
 
       <View style={styles.containerFooterButton}>
@@ -463,26 +478,25 @@ export const CustomerCard = () => {
           <Button title="DOC" onPress={handleDocButtonPress} />
         </View>
       </View>
-      <View style={styles.searchAndButtonsContainer}>
-        <TextInput
-          style={styles.searchInput}
-          // onChangeText={} // UseState = set
-          // value={} //UseSate
-          placeholder="Buscar por CUPS"
-        />
-        <TouchableOpacity
-          style={styles.roundButton}
-          onPress={() => console.log("Agregar")}
-        >
-          <ComponentSupplyPoint />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.roundButton}
-          onPress={() => console.log("Actualizar")}
-        >
-          <Icon name="refresh" size={20} color="#FFF" />
-        </TouchableOpacity>
-      </View>
+      {showPsSection && (
+        <View style={styles.searchAndButtonsContainer}>
+          <TextInput style={styles.searchInput} placeholder="Buscar por CUPS" />
+          <Icon type="material" name="search" size={33} color="#9c9c9c" />
+
+          <TouchableOpacity
+            style={styles.roundButton}
+            onPress={() => console.log("Agregar CUPS")}
+          >
+            <ComponentSupplyPoint />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.roundButton}
+            onPress={() => console.log("Actualizar")}
+          >
+            <Icon name="refresh" size={20} color="#008000" />
+          </TouchableOpacity>
+        </View>
+      )}
       {showCommentsField && (
         <View style={styles.commentsContainer}>
           <TextInput
@@ -516,14 +530,22 @@ export const CustomerCard = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.buttonCupsAdd}
-                onPress={() => console.log("Actualizar")}
+                onPress={() => console.log("Agregar")}
               >
                 <Icon name="add" size={18} color="#007BFF" />
               </TouchableOpacity>
             </View>
           </View>
           {fullAddress && (
-            <Text style={styles.fullAddressText}>{fullAddress}</Text>
+            <Text style={styles.fullAddressText}>
+              <Icon
+                type="material"
+                name="location-on"
+                size={15}
+                color="#cb3234"
+              />
+              {fullAddress}
+            </Text>
           )}
 
           <View style={styles.psContainer}>{renderSupplyPointsTable()}</View>
@@ -534,12 +556,19 @@ export const CustomerCard = () => {
         <View>
           <View style={styles.docStyle}>
             <View style={styles.buttonNewFile}>
-              <Button title="+ AÑADIR NUEVO ARCHIVO" />
               <TouchableOpacity
-                style={styles.roundButton}
+                style={styles.addDocumentArchive}
+                onPress={() => console.log("Cargar archivo")}
+              >
+                <Text style={styles.textStyleAddDoc}>
+                  + AÑADIR NUEVO ARCHIVO
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.updateDocButton}
                 onPress={() => console.log("Actualizar")}
               >
-                <Icon name="refresh" size={20} color="#FFF" />
+                <Icon name="refresh" size={30} color="#008000" />
               </TouchableOpacity>
             </View>
           </View>
@@ -548,6 +577,20 @@ export const CustomerCard = () => {
             <Text style={styles.titlePs}>Usuario</Text>
             <Text style={styles.titlePs}>Archivo</Text>
             <Text style={styles.titlePs}>Typo</Text>
+            <TouchableOpacity
+              style={styles.downloadFilesButton}
+              onPress={() => console.log("Download")}
+            >
+              <Icon
+                type="material"
+                name="file-download"
+                size={30}
+                color="#9c9c9c"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => console.log("Delete")}>
+              <Icon name="delete" size={35} color="#FF0000" />
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -565,26 +608,30 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    // flex: 1,
-    height: 270,
+    height: 250,
   },
   inputClient: {
-    height: 50,
+    height: 30,
     borderColor: "gray",
     borderWidth: 1,
     marginRight: 10,
-    marginLeft: 20,
-    padding: 10,
-    flex: 1,
+    marginLeft: 10,
+    padding: 5,
+    width: 250,
+    textAlign: "center",
   },
   titlePhoneInputContainer: {
     alignItems: "center",
-    flex: 1,
+    width: 250,
+    height: 250,
+    marginRight: 170,
+    marginLeft: 30,
   },
   titleInputContainer: {
     flexDirection: "column",
     height: 60,
     alignItems: "center",
+    width: 250,
   },
   estadoText: {
     fontSize: 16,
@@ -593,9 +640,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   statusClient: {
-    marginRight: 100,
-    marginLeft: 30,
-    flex: 1,
+    marginRight: 190,
+    width: 350,
   },
   textInput: {
     height: 30,
@@ -607,8 +653,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-between",
     width: 200,
-    marginLeft: 100,
-    marginRight: 100,
+    marginRight: 30,
   },
   buttonStyle: {
     marginBottom: 5,
@@ -634,7 +679,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 0,
+    marginLeft: 23,
   },
   inputRowClient: {
     flexDirection: "row",
@@ -645,17 +690,24 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 60,
   },
+  namePersonContac: {
+    height: 38,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginRight: 15,
+    padding: 10,
+    marginHorizontal: -25,
+  },
   containerNumberDocument: {
     flex: 1,
     height: 60,
     marginTop: -10,
   },
   input: {
-    height: 40,
+    height: 38,
     borderColor: "gray",
     borderWidth: 1,
     marginRight: 10,
-    flex: 1,
     padding: 10,
   },
   inputDateClient: {
@@ -755,8 +807,8 @@ const styles = StyleSheet.create({
   },
   searchAndButtonsContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end", // Esto mueve los elementos a la derecha
-    alignItems: "flex-end", // Esto alinea los elementos en la parte inferior
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
     width: 260,
     marginTop: -30,
     marginLeft: 980,
@@ -774,19 +826,55 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  buttonNewFile: {
+    marginLeft: 960,
+    width: 280,
+    height: 40,
+    flexDirection: "row",
+    alignSelf: "flex-end",
+    justifyContent: "flex-end",
+    marginBottom: -8,
+  },
+  updateDocButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+    marginLeft: 30,
+  },
+  addDocumentArchive: {
+    backgroundColor: "#008000",
+    borderWidth: 1,
+    padding: 7,
+    borderRadius: 10,
+  },
+  textStyleAddDoc: {
+    color: "#FFFFFF",
+    fontSize: 13,
+  },
+  downloadFilesButton: {
+    // width: 40,
+    // height: 40,
+    // justifyContent: "center",
+    // alignItems: "center",
+  },
   searchInput: {
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    marginRight: 5,
-    width: 150,
+    marginRight: -30,
+    width: 170,
     borderRadius: 5,
+    padding: 5,
   },
   roundButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#007BFF",
+    borderColor: "#008000",
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
@@ -797,13 +885,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  buttonNewFile: {
-    flex: 1,
-    height: 40,
-    flexDirection: "row",
-    alignSelf: "flex-end",
-    justifyContent: "flex-end",
-  },
+
   fullAddressText: {
     fontSize: 12,
     fontWeight: "bold",
