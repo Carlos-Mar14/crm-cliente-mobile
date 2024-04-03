@@ -153,30 +153,38 @@ export const PhoneNumber = () => {
           setModalVisible(!modalVisible);
         }}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Icon name="close" size={20} color="#000000" />
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              Ingresa un nuevo número de teléfono
-            </Text>
-            <TextInput
-              style={styles.modalInput}
-              value={newPhone}
-              onChangeText={handleNewPhoneChange}
-              placeholder="Nuevo número de teléfono"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={notePhone}
-              onChangeText={handleNoteChange}
-              placeholder="Nota"
-            />
-            <View style={styles.modalButtons}>
+        <View style={styles.overlay}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalTextNewTel}>
+                  Ingresa nuevo número de teléfono
+                </Text>
+                <Icon name="close" size={25} color="#FF0000" />
+              </TouchableOpacity>
+              <View style={styles.titleModalText}>
+                <Text style={{ fontWeight: "bold" }}>Numero de teléfono</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={newPhone}
+                  onChangeText={handleNewPhoneChange}
+                  placeholder="Nuevo número de teléfono"
+                />
+              </View>
+              <View>
+                <Text style={{ fontWeight: "bold" }}>Nota</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={notePhone}
+                  onChangeText={handleNoteChange}
+                  placeholder="Nota"
+                />
+              </View>
+            </View>
+            <View style={styles.modalButtonsSave}>
               <Button title="Guardar" onPress={handleNewPhoneSave} />
             </View>
           </View>
@@ -190,27 +198,37 @@ export const PhoneNumber = () => {
           setEditModalVisible(!editModalVisible);
         }}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setEditModalVisible(false)}
-            >
-              <Icon name="close" size={20} color="#000000" />
-            </TouchableOpacity>
-            <Text style={styles.modalText}>Editar número de teléfono</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={editPhone}
-              onChangeText={handleNewPhoneChange}
-              placeholder="Nuevo número de teléfono"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={editNote}
-              onChangeText={handleNoteChange}
-              placeholder="Nota"
-            />
+        <View style={styles.overlay}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.modalTextEditTel}>
+                  Editar número de teléfono
+                </Text>
+                <Icon name="close" size={25} color="#FF0000" />
+              </TouchableOpacity>
+              <View style={styles.titleModalText}>
+                <Text style={{ fontWeight: "bold" }}>Numero de teléfono</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editPhone}
+                  onChangeText={handleNewPhoneChange}
+                  placeholder="Nuevo número de teléfono"
+                />
+              </View>
+              <View>
+                <Text style={{ fontWeight: "bold" }}>Nota</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editNote}
+                  onChangeText={handleNoteChange}
+                  placeholder="Nota"
+                />
+              </View>
+            </View>
             <View style={styles.modalButtons}>
               <Button title="Guardar" onPress={handleEditPhoneSave} />
               <TouchableOpacity
@@ -263,6 +281,12 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     width: 250,
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -270,10 +294,10 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    margin: 20,
+    // margin: 10,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 100,
+    padding: 50,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -285,12 +309,30 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalText: {
-    marginBottom: 15,
     textAlign: "center",
     fontWeight: "bold",
+    // borderWidth: 1,
+    marginRight: 35,
+    marginTop: 20,
+  },
+  modalTextNewTel: {
+    textAlign: "center",
+    fontWeight: "bold",
+    // borderWidth: 1,
+    marginRight: 55,
+    marginBottom: 10,
+  },
+  modalTextEditTel: {
+    textAlign: "center",
+    fontWeight: "bold",
+    // borderWidth: 1,
+    marginRight: 105,
+  },
+  titleModalText: {
+    marginBottom: -20,
   },
   modalInput: {
-    marginBottom: 15,
+    marginBottom: 25,
     width: 250,
     borderColor: "gray",
     borderWidth: 1,
@@ -300,12 +342,23 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    right: 10,
+    right: 15,
     top: 10,
+    // marginTop: 20,
+    flexDirection: "row",
+    // marginBottom: 35,
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginLeft: 200,
+    marginTop: -45,
+  },
+  modalButtonsSave: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginLeft: 230,
+    marginTop: -45,
   },
   buttonText: {
     fontSize: 15,

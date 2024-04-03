@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { CustomerCard } from "./CustomerCard";
-import { Button, Modal, View } from "react-native";
+import { Button, Modal, TouchableOpacity, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 export const ModalCustomerCard = ({ isModalVisible, onClose }) => {
-    return (
+  return (
+    <View style={{ flex: 1 }}>
+      <Modal visible={isModalVisible}>
         <View style={{ flex: 1 }}>
-            <Button title="Show modal" onPress={onClose} />
-            <Modal visible={isModalVisible}>
-                <View style={{ flex: 1 }}>
-                    <Button title="Cerrar modal" onPress={onClose} />
-                    <CustomerCard />
-                </View>
-        </Modal>
+          <TouchableOpacity
+            onPress={onClose}
+            style={{ alignSelf: "flex-end", marginRight: 10 }}
+          >
+            <Icon name="close" size={30} color="#000000" />
+          </TouchableOpacity>
+          <CustomerCard />
+        </View>
+      </Modal>
     </View>
-    );
+  );
 };
