@@ -7,7 +7,7 @@ import React from "react";
 import { Alert, View } from "react-native";
 import { useAuth } from "../components/AuthContext";
 
-import { Icon, ListItem, } from "react-native-elements";
+import { Icon, ListItem } from "react-native-elements";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { StackNavigation } from "./StackNavigation";
@@ -41,7 +41,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
       "Cerrar sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
       [
-        { text: "No", style: "cancel", onPress: () => { } },
+        { text: "No", style: "cancel", onPress: () => {} },
         {
           text: "Sí",
           style: "destructive",
@@ -56,37 +56,38 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
 
   const menuItems = [
     {
-
       title: "Agenda",
       onPress: () => navigation.navigate("CalendarScreen"),
-      icon: "calendar"
+      icon: "calendar",
     },
     {
       title: "Perfil",
       onPress: () => navigation.navigate("ProfileScreen"),
-      icon: "account"
+      icon: "account",
     },
     {
       title: "Cerrar Sesión",
       onPress: onLogout,
       icon: "logout",
-      iconColor: "red"
-    }
-  ]
+      iconColor: "red",
+    },
+  ];
 
   return (
     <DrawerContentScrollView>
-      <View style={{ flex: 1 }}>
-        {menuItems.map((item, i) => (
-          <ListItem key={i} bottomDivider onPress={item.onPress} >
-            <Icon name={item.icon} type="material-community" color={item.iconColor} />
-            <ListItem.Content>
-              <ListItem.Title>{item.title}</ListItem.Title>
-            </ListItem.Content>
-            <ListItem.Chevron />
-          </ListItem>
-        ))}
-      </View>
+      {menuItems.map((item, i) => (
+        <ListItem key={i} bottomDivider onPress={item.onPress}>
+          <Icon
+            name={item.icon}
+            type="material-community"
+            color={item.iconColor}
+          />
+          <ListItem.Content>
+            <ListItem.Title>{item.title}</ListItem.Title>
+          </ListItem.Content>
+          <ListItem.Chevron />
+        </ListItem>
+      ))}
     </DrawerContentScrollView>
   );
 };
