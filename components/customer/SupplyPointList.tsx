@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, TouchableOpacity, Text, Button } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  Modal,
+  FlatList,
+  Button,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Icon } from "react-native-elements";
-import { Table, Row, Cell } from "react-native-table-component";
+import { Table, Row } from "react-native-table-component";
 import { api } from "../../utils/api";
 import { ComponentSupplyPoint } from "./ComponentSupplyPoint";
-import { StyleSheet } from "react-native";
-import { SupplyPoint, ApiResponse, SheetData } from "./CustomerCard";
+import { SupplyPoint, ApiResponse } from "./CustomerCard";
+import CreateCupsModal from "./CreateCupsModal";
 
 //Este es el que lleva SupplyPointList
 export interface SupplyPointEnergy {
@@ -28,53 +38,87 @@ export interface SupplyPointEnergy {
   firma: string;
 }
 
+type SupplyPointState = SupplyPoint[] | { [key: string]: SupplyPoint[] };
 
 export const SupplyPointList = () => {
-  const [events, setEvents] = useState<SupplyPoint[]>([]);
-  const [fullAddress, setFullAddress] = useState("");
-  
+  const [events, setEvents] = useState<SupplyPointState>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const eventsArray = Object.entries(events).map(([address, data]) => ({
+    address,
+    data,
+  }));
 
   useEffect(() => {
     getItems();
   }, []);
 
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  function groupAddress(data) {
+    const grouped = {};
+    data.forEach((item) => {
+      const address = item.full_address;
+      if (!groupAddress[address]) {
+        grouped[address] = [];
+      }
+      grouped[address].push(item);
+    });
+    return grouped;
+  }
+
   async function getItems() {
     const response = await api.get<ApiResponse>("/puntos/");
+    const groupedData = groupAddress(response.data.results);
     //console.log("Datos obtenidos:", response.data);
-    setEvents(response.data.results);
-    if (response.data.results.length > 0) {
-      setFullAddress(response.data.results[0].full_address);
-    }
+    setEvents(groupedData);
     //console.log("Datos cargados en el estado:", events);
   }
 
+  const tableHead = [
+    "CUPS",
+    "Comerc",
+    "Tarifa",
+    "Consumo",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "Ult. Cambio de comerc",
+    "Fecha Firma",
+    "Estado",
+    "",
+  ];
 
-  const renderSupplyPointsTable = () => {
-    if (!Array.isArray(events)) {
-      return null;
+  const renderItem = ({ item }) => {
+    let luzRow = Array(14).fill("");
+    let gasRow = Array(14).fill("");
+
+    const hasLuz = item.data.some((event) => event.punto_luz);
+    const hasGas = item.data.some((event) => event.punto_gas);
+
+    let buttonStyle;
+    let buttonText = "Agregar CUPS";
+    if (hasLuz) {
+      buttonStyle = styles.buttonAddGas;
+      buttonText = "AÑADIR CUPS GAS";
+    } else if (hasGas) {
+      buttonStyle = styles.buttonAddLuz;
+      buttonText = "AÑADIR CUPS LUZ";
+    } else {
+      buttonStyle = styles.buttonAddLuz;
     }
 
-    const tableHead = [
-      "CUPS",
-      "Comerc",
-      "Tarifa",
-      "Consumo",
-      "P1",
-      "P2",
-      "P3",
-      "P4",
-      "P5",
-      "P6",
-      "Ult. Cambio de comerc",
-      "Fecha Firma",
-      "Estado",
-      "",
-    ];
-
-    const tableData = events.flatMap((event) => {
-      const rows = [];
+    item.data.forEach((event) => {
       if (event.punto_luz) {
-        rows.push([
+        luzRow = [
           event.punto_luz.cups,
           event.punto_luz.company,
           event.punto_luz.tarif,
@@ -89,10 +133,10 @@ export const SupplyPointList = () => {
           event.punto_luz.fecha_firma,
           event.punto_luz.status_text,
           event.punto_luz.firma,
-        ]);
+        ];
       }
       if (event.punto_gas) {
-        rows.push([
+        gasRow = [
           event.punto_gas.cups,
           event.punto_gas.company,
           event.punto_gas.tarif,
@@ -107,42 +151,95 @@ export const SupplyPointList = () => {
           event.punto_gas.fecha_firma,
           event.punto_gas.status_text,
           event.punto_gas.firma,
-        ]);
+        ];
       }
-      return rows;
     });
 
-    return (
-      <Table>
-        <Row
-          data={tableHead.map((headItem) => (
-            <Text style={styles.headText}>{headItem}</Text>
-          ))}
-          style={styles.head}
-          widthArr={[
-            190, 190, 60, 80, 30, 30, 30, 30, 30, 30, 180, 100, 130, 100,
-          ]}
-        />
+    if (!hasLuz) {
+      luzRow = luzRow.map((cell, index) => {
+        if (index === 0) {
+          // Asumiendo que el primer elemento es el lugar para el botón
+          return (
+            <TouchableOpacity
+              style={buttonStyle}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.buttonAddCupsText}>{buttonText}</Text>
+            </TouchableOpacity>
+          );
+        }
+        return cell;
+      });
+    }
 
-        {tableData.map((rowData, rowIndex) => (
+    if (!hasGas) {
+      gasRow = gasRow.map((cell, index) => {
+        if (index === 0) {
+          // Asumiendo que el primer elemento es el lugar para el botón
+          return (
+            <TouchableOpacity
+              style={buttonStyle}
+              onPress={() => console.log("Agregarrrr CUPS")}
+            >
+              <Text style={styles.buttonAddCupsText}>{buttonText}</Text>
+            </TouchableOpacity>
+          );
+        }
+        return cell;
+      });
+    }
+
+    return (
+      <View key={item.address}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Icon type="material" name="location-on" size={15} color="#cb3234" />
+          <Text style={styles.fullAddressText}>{item.address}</Text>
+        </View>
+        <Table>
           <Row
-            key={rowIndex}
-            data={rowData.map((cellData, cellIndex) => (
+            data={tableHead.map((headItem) => (
+              <Text style={styles.headText}>{headItem}</Text>
+            ))}
+            style={styles.head}
+            widthArr={[
+              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
+            ]}
+          />
+          <Row
+            data={luzRow.map((cellData) => (
               <Text style={styles.textInCell}>{cellData}</Text>
             ))}
             style={styles.row}
             widthArr={[
-              190, 190, 60, 80, 30, 30, 30, 30, 30, 30, 180, 100, 130, 100,
+              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
             ]}
           />
-        ))}
-      </Table>
+          <Row
+            data={gasRow.map((cellData) => (
+              <Text style={styles.textInCell}>{cellData}</Text>
+            ))}
+            style={styles.row}
+            widthArr={[
+              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
+            ]}
+          />
+        </Table>
+      </View>
     );
   };
 
   return (
     <View>
       <View style={styles.searchAndButtonsContainer}>
+        <Text
+          style={{
+            fontWeight: "bold",
+            width: 170,
+            marginRight: 800,
+          }}
+        >
+          Puntos de Suministros
+        </Text>
         <TextInput style={styles.searchInput} placeholder="Buscar por CUPS" />
         <Icon type="material" name="search" size={33} color="#9c9c9c" />
         <TouchableOpacity
@@ -158,42 +255,17 @@ export const SupplyPointList = () => {
           <Icon name="refresh" size={20} color="#008000" />
         </TouchableOpacity>
       </View>
+      {/* TODO: mover este modal a nuevo archivo "CreateCupsModal" */}
+      <CreateCupsModal visible={modalVisible} onClose={handleCloseModal} />
+
       <View style={styles.psPadre}>
-          <Text style={{ fontWeight: "bold", marginBottom: -10 }}>
-            Puntos de Suministros
-          </Text>
-          <View style={styles.psStyle}>
-            <View style={styles.optionsCups}>
-              <TouchableOpacity>
-                <Text style={styles.buttonAddCups}>AÑADIR CUPS</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonCups}
-                onPress={() => console.log("Actualizar")}
-              >
-                <Icon name="east" size={18} color="#ff8000" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonCupsAdd}
-                onPress={() => console.log("Agregar")}
-              >
-                <Icon name="add" size={18} color="#007BFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-          {fullAddress && (
-            <Text style={styles.fullAddressText}>
-              <Icon
-                type="material"
-                name="location-on"
-                size={15}
-                color="#cb3234"
-              />
-              {fullAddress}
-            </Text>
-          )}
-          <View style={styles.psContainer}>{renderSupplyPointsTable()}</View>
-        </View>
+        <FlatList
+          data={eventsArray}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.address}
+          style={styles.flatList}
+        />
+      </View>
     </View>
   );
 };
@@ -204,7 +276,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: 260,
-    marginTop: -30,
     marginLeft: 980,
   },
   searchInput: {
@@ -217,52 +288,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   psPadre: {
-    height: 130,
-  },
-  psStyle: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  optionsCups: {
-    borderColor: "#000",
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: -5,
-    marginLeft: 740,
-    width: 250,
-    height: 30,
-  },
-  buttonAddCups: {
-    color: "#008000",
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: "#008000",
-    width: 110,
-    height: 25,
-    textAlign: "center",
-    marginRight: 20,
-    marginTop: 10,
-    alignItems: "center",
-  },
-  buttonCups: {
-    width: 35,
-    height: 35,
-    borderRadius: 20,
-    borderColor: "#ff8000",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 40,
-  },
-  buttonCupsAdd: {
-    width: 35,
-    height: 35,
-    borderRadius: 20,
-    borderColor: "#007BFF",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    height: 170,
   },
   roundButton: {
     width: 40,
@@ -277,12 +303,7 @@ const styles = StyleSheet.create({
   fullAddressText: {
     fontSize: 12,
     fontWeight: "bold",
-    marginTop: -10,
     width: 650,
-  },
-  psContainer: {
-    marginBottom: 15,
-    justifyContent: "space-between",
   },
   head: {
     borderWidth: 0.4,
@@ -301,6 +322,42 @@ const styles = StyleSheet.create({
   },
   headText: {
     textAlign: "center",
+    fontWeight: "bold",
+  },
+  flatListStyle: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 25,
+  },
+  flatList: {},
+  buttonAddLuz: {
+    color: "#008000",
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: "#008000",
+    width: 150,
+    height: 25,
+    textAlign: "center",
+    marginTop: 5,
+    marginBottom: -20,
+    alignItems: "center",
+    marginLeft: 700,
+  },
+  buttonAddGas: {
+    color: "#008000",
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: "#008000",
+    width: 150,
+    height: 25,
+    textAlign: "center",
+    marginTop: 5,
+    marginBottom: -20,
+    alignItems: "center",
+    marginLeft: 700,
+  },
+  buttonAddCupsText: {
+    color: "#008000",
     fontWeight: "bold",
   },
 });

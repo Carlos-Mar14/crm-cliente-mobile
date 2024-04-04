@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { Icon } from "react-native-elements";
+import { Icon, Tab, TabView } from "react-native-elements";
 import { api } from "../../utils/api";
 import { PhoneNumber } from "./PhoneNumber";
 import { SupplyPointList, SupplyPointEnergy } from "./SupplyPointList";
+import CustomerCardTabs from "./CustomerCardTabs";
 
 export interface ApiResponse {
   count: number;
@@ -61,11 +62,7 @@ export const CustomerCard = () => {
   const [selectedClientType, setSelectedClientType] = useState("");
   const [selectedDocumentType, setSelectedDocumentType] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [showCommentsField, setShowCommentsField] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [showPsField, setShowPsField] = useState(false);
-  const [showPsSection, setShowPsSection] = useState(false);
-  const [showDoc, setShowDoc] = useState(false);
+
   const [idSheet, setIdSheet] = useState("");
   const [customerFile, setCustomerFile] = useState<SheetData | null>(null);
 
@@ -91,27 +88,6 @@ export const CustomerCard = () => {
 
   const handleButtonPress = (estado) => {
     setstatusClient(estado);
-  };
-
-  const handleCommentsButtonPress = () => {
-    setShowCommentsField(true);
-    setShowPsField(false);
-    setShowDoc(false);
-    setShowPsSection(false);
-  };
-
-  const handlePsButtonPress = () => {
-    setShowPsField(true);
-    setShowCommentsField(false);
-    setShowDoc(false);
-    setShowPsSection(true);
-  };
-
-  const handleDocButtonPress = () => {
-    setShowDoc(true);
-    setShowCommentsField(false);
-    setShowPsField(false);
-    setShowPsSection(false);
   };
 
   const statusColors = {
@@ -344,74 +320,8 @@ export const CustomerCard = () => {
         <TextInput placeholder="Observaciones..."></TextInput>
       </View>
       <View style={styles.horizontalLine} />
-
-      <View style={styles.containerFooterButton}>
-        <View style={styles.buttonFooter}>
-          <Button title="Comentarios" onPress={handleCommentsButtonPress} />
-          <Button title="P.S" onPress={handlePsButtonPress} />
-          <Button title="DOC" onPress={handleDocButtonPress} />
-        </View>
-      </View>
-
-      {showPsSection && <SupplyPointList />}
-
-      {showCommentsField && (
-        <View style={styles.commentsContainer}>
-          <TextInput
-            style={styles.commentsInput}
-            onChangeText={setCommentText}
-            value={commentText}
-            placeholder="Nuevo comentario..."
-          />
-          <Button
-            title="Enviar"
-            onPress={() => console.log("Comentario enviado:", commentText)}
-          />
-        </View>
-      )}
-
-      {showDoc && (
-        <View>
-          <View style={styles.docStyle}>
-            <View style={styles.buttonNewFile}>
-              <TouchableOpacity
-                style={styles.addDocumentArchive}
-                onPress={() => console.log("Cargar archivo")}
-              >
-                <Text style={styles.textStyleAddDoc}>
-                  + AÑADIR NUEVO ARCHIVO
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.updateDocButton}
-                onPress={() => console.log("Actualizar")}
-              >
-                <Icon name="refresh" size={30} color="#008000" />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.docContainer}>
-            <Text style={styles.titlePs}>Fecha</Text>
-            <Text style={styles.titlePs}>Usuario</Text>
-            <Text style={styles.titlePs}>Archivo</Text>
-            <Text style={styles.titlePs}>Typo</Text>
-            <TouchableOpacity
-              style={styles.downloadFilesButton}
-              onPress={() => console.log("Download")}
-            >
-              <Icon
-                type="material"
-                name="file-download"
-                size={30}
-                color="#9c9c9c"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log("Delete")}>
-              <Icon name="delete" size={35} color="#FF0000" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      {/* TODO: mover este Tabs a nuevo archivo CustomerCardTabs.tsx */}
+      <CustomerCardTabs />
     </View>
   );
 };
@@ -550,78 +460,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000",
     borderRadius: 2,
-  },
-  containerFooterButton: {
-    alignItems: "center",
-  },
-  buttonFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginLeft: 5,
-    marginTop: 5,
-  },
-  commentsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  commentsInput: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginRight: 10,
-    flex: 1,
-    padding: 10,
-  },
-  docContainer: {
-    borderWidth: 1,
-    borderColor: "#000",
-    padding: 8,
-    marginBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  buttonNewFile: {
-    marginLeft: 960,
-    width: 280,
-    height: 40,
-    flexDirection: "row",
-    alignSelf: "flex-end",
-    justifyContent: "flex-end",
-    marginBottom: -8,
-  },
-  updateDocButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-    marginLeft: 30,
-  },
-  addDocumentArchive: {
-    backgroundColor: "#008000",
-    borderWidth: 1,
-    padding: 7,
-    borderRadius: 10,
-  },
-  textStyleAddDoc: {
-    color: "#FFFFFF",
-    fontSize: 13,
-  },
-  downloadFilesButton: {
-    // width: 40,
-    // height: 40,
-    // justifyContent: "center",
-    // alignItems: "center",
-  },
-  titlePs: {},
-  docStyle: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
   },
   fullAddressTextFicha: {
     fontSize: 15,
