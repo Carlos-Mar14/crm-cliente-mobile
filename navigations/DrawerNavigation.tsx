@@ -4,11 +4,10 @@ import {
   createDrawerNavigator,
 } from "@react-navigation/drawer";
 import React from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { Button, Icon } from "react-native-elements";
+import { Alert, View } from "react-native";
 import { useAuth } from "../components/AuthContext";
 
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Icon, ListItem, } from "react-native-elements";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { StackNavigation } from "./StackNavigation";
@@ -55,51 +54,39 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
     );
   };
 
+  const menuItems = [
+    {
+
+      title: "Agenda",
+      onPress: () => navigation.navigate("CalendarScreen"),
+      icon: "calendar"
+    },
+    {
+      title: "Perfil",
+      onPress: () => navigation.navigate("ProfileScreen"),
+      icon: "account"
+    },
+    {
+      title: "Cerrar Sesión",
+      onPress: onLogout,
+      icon: "logout",
+      iconColor: "red"
+    }
+  ]
+
   return (
-    <DrawerContentScrollView style={styles.menuDrawer}>
-      <View style={styles.drawerContent}>
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Text style={styles.drawerText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate("CalendarScreen")}
-        >
-          <Text style={styles.drawerText}>Agenda</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate("ProfileScreen")}
-        >
-          <Text style={styles.drawerText}>Perfil</Text>
-        </TouchableOpacity>
-        <Button
-          icon={<Icon name="exit-to-app" size={15} color="white" />}
-          title=" Cerrar sesión"
-          onPress={onLogout}
-        />
+    <DrawerContentScrollView>
+      <View style={{ flex: 1 }}>
+        {menuItems.map((item, i) => (
+          <ListItem key={i} bottomDivider onPress={item.onPress} >
+            <Icon name={item.icon} type="material-community" color={item.iconColor} />
+            <ListItem.Content>
+              <ListItem.Title>{item.title}</ListItem.Title>
+            </ListItem.Content>
+            <ListItem.Chevron />
+          </ListItem>
+        ))}
       </View>
     </DrawerContentScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  menuDrawer: {
-    backgroundColor: "#00A2",
-    width: 200,
-  },
-  drawerContent: {
-    flex: 1,
-    alignItems: "center",
-  },
-  drawerItem: {
-    width: "100%",
-    justifyContent: "center",
-  },
-  drawerText: {
-    textAlign: "center",
-  },
-});
