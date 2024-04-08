@@ -1,7 +1,7 @@
 import { isEmpty } from "lodash";
 import React, { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
-import { Button, Icon, Input } from "react-native-elements";
+import { Button, Icon, Input } from '@rneui/themed';
 import logo from "../../assets/wide_logo.png";
 import { validateEmail } from "../../utils/helpers";
 import { useAuth } from "../AuthContext";

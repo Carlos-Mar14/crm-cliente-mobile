@@ -194,7 +194,8 @@ export const CalendarScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F0F0",
+    marginTop: 20,
   },
   buttonContainer: {
     flexDirection: "row",

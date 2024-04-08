@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CustomerCard } from "./CustomerCard";
 import { Button, Modal, TouchableOpacity, View } from "react-native";
-import { Icon } from "react-native-elements";
+import { Icon } from '@rneui/themed';
 
 export const ModalCustomerCard = ({ isModalVisible, onClose }) => {
   return (

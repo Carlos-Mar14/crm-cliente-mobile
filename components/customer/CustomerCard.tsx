@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { Icon, Tab, TabView } from "react-native-elements";
+import { Icon, Tab, TabView } from '@rneui/themed';
 import { api } from "../../utils/api";
 import { PhoneNumber } from "./PhoneNumber";
 import { SupplyPointList, SupplyPointEnergy } from "./SupplyPointList";
@@ -320,7 +320,6 @@ export const CustomerCard = () => {
         <TextInput placeholder="Observaciones..."></TextInput>
       </View>
       <View style={styles.horizontalLine} />
-      {/* TODO: mover este Tabs a nuevo archivo CustomerCardTabs.tsx */}
       <CustomerCardTabs />
     </View>
   );

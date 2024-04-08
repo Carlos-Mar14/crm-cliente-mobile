@@ -1,21 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  Button,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, Alert, Text } from "react-native";
+import { Input, Button, Overlay, Icon } from '@rneui/themed';
 import { api } from "../../utils/api";
-import { Icon } from "react-native-elements";
 
 interface CustomerPhones {
   id?: number;
   value: string;
-  desc: string | null; // Ajustado aquí para permitir string o null
+  desc: string | null;
   card_id: number;
   card_name: string;
 }
@@ -29,6 +20,9 @@ export const PhoneNumber = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [editPhone, setEditPhone] = useState<string>("");
   const [editNote, setEditNote] = useState<string>("");
+  const [cardId, setCardId] = useState<number | null>(null);
+  const [cardName, setCardName] = useState<string | null>(null);
+ 
 
   useEffect(() => {
     getItems();
@@ -36,7 +30,6 @@ export const PhoneNumber = () => {
 
   async function getItems() {
     const response = await api.get("/ficha/");
-    //console.log("Telefonos!!!", response.data);
     if (response.data && Array.isArray(response.data.phones)) {
       setPhones(response.data.phones);
     }
@@ -79,22 +72,24 @@ export const PhoneNumber = () => {
 
   //Modificar para que card_id y  card_name sean los valores que vengan desde el json o el api
   const handleNewPhoneSave = () => {
-    if (newPhone) {
+    if (newPhone && cardId !== null && cardName !== null) {
       setPhones([
         ...phones,
         {
           id: undefined,
           value: newPhone,
           desc: notePhone,
-          card_id: 3113611,
-          card_name: "LEE CHOONG HYOUNG",
+          card_id: cardId,
+          card_name: cardName, 
         },
       ]);
       setNewPhone("");
       setNotePhone("");
       setModalVisible(false);
+    } else {
+      console.error("Faltan datos para guardar el nuevo número de teléfono.");
     }
-  };
+ };
 
   const handleEditPhoneSave = () => {
     if (editingPhone) {
@@ -109,6 +104,7 @@ export const PhoneNumber = () => {
       setEditModalVisible(false);
     }
   };
+
   const handleDeletePhone = (phoneId: number) => {
     Alert.alert(
       "Confirmación",
@@ -136,116 +132,77 @@ export const PhoneNumber = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={styles.buttonStyle}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.buttonText}>Nuevo numero de Telefono</Text>
-          <Icon name="add" size={25} color="#008000" />
-        </TouchableOpacity>
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
+      <Button
+        titleStyle={{
+          color: "#000000",
         }}
-      >
+        title="Nuevo numero de Telefono"
+        onPress={() => setModalVisible(true)}
+        buttonStyle={styles.buttonAddPhone}
+        icon={<Icon name="add" size={25} color="#008000" />}
+      />
+      <Overlay isVisible={modalVisible}>
         <View style={styles.overlay}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalTextNewTel}>
-                  Ingresa nuevo número de teléfono
-                </Text>
-                <Icon name="close" size={25} color="#FF0000" />
-              </TouchableOpacity>
-              <View style={styles.titleModalText}>
-                <Text style={{ fontWeight: "bold" }}>Numero de teléfono</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={newPhone}
-                  onChangeText={handleNewPhoneChange}
-                  placeholder="Nuevo número de teléfono"
-                />
-              </View>
-              <View>
-                <Text style={{ fontWeight: "bold" }}>Nota</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={notePhone}
-                  onChangeText={handleNoteChange}
-                  placeholder="Nota"
-                />
-              </View>
-            </View>
-            <View style={styles.modalButtonsSave}>
-              <Button title="Guardar" onPress={handleNewPhoneSave} />
-            </View>
+          <Text style={styles.titleNewPhone}>Nuevo Número de Télefono</Text>
+          <Input
+            placeholder="Nuevo número de teléfono"
+            value={newPhone}
+            onChangeText={handleNewPhoneChange}
+          />
+          <Input
+            placeholder="Nota"
+            value={notePhone}
+            onChangeText={handleNoteChange}
+          />
+          <View style={styles.buttonEditPhone}>
+            <Button
+              title="Guardar"
+              onPress={() => {
+                handleNewPhoneSave();
+                setModalVisible(false);
+              }}
+            />
           </View>
         </View>
-      </Modal>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={editModalVisible}
-        onRequestClose={() => {
-          setEditModalVisible(!editModalVisible);
-        }}
-      >
+      </Overlay>
+      <Overlay isVisible={editModalVisible}>
         <View style={styles.overlay}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setEditModalVisible(false)}
-              >
-                <Text style={styles.modalTextEditTel}>
-                  Editar número de teléfono
-                </Text>
-                <Icon name="close" size={25} color="#FF0000" />
-              </TouchableOpacity>
-              <View style={styles.titleModalText}>
-                <Text style={{ fontWeight: "bold" }}>Numero de teléfono</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editPhone}
-                  onChangeText={handleNewPhoneChange}
-                  placeholder="Nuevo número de teléfono"
-                />
-              </View>
-              <View>
-                <Text style={{ fontWeight: "bold" }}>Nota</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={editNote}
-                  onChangeText={handleNoteChange}
-                  placeholder="Nota"
-                />
-              </View>
-            </View>
-            <View style={styles.modalButtons}>
-              <Button title="Guardar" onPress={handleEditPhoneSave} />
-              <TouchableOpacity
-                onPress={() => handleDeletePhone(editingPhone?.id)}
-              >
-                <Icon name="delete" size={35} color="#FF0000" />
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.titleEditPhone}>Editar Teléfono</Text>
+          <Input
+            placeholder="Nuevo número de teléfono"
+            value={editPhone}
+            onChangeText={handleNewPhoneChange}
+          />
+          <Input
+            placeholder="Nota"
+            value={editNote}
+            onChangeText={handleNoteChange}
+          />
+          <View style={styles.buttonEditPhone}>
+            <Button
+              title="Guardar"
+              onPress={() => {
+                handleEditPhoneSave();
+                setEditModalVisible(false);
+              }}
+            />
+            <Icon
+              name="delete"
+              size={35}
+              color="#FF0000"
+              onPress={() => {
+                handleDeletePhone(editingPhone?.id);
+                setEditModalVisible(false);
+              }}
+            />
           </View>
         </View>
-      </Modal>
+      </Overlay>
       {Array.isArray(phones) &&
         phones.map((phone, index) => (
           <View style={styles.phoneContainer} key={index}>
             {editingPhone && editingPhone.id === phone.id ? (
-              <TextInput
-                style={styles.phoneText}
+              <Input
                 value={phone.value}
                 onChangeText={(text) => handleSave(text)}
                 onBlur={() => setEditingPhone(null)}
@@ -257,9 +214,12 @@ export const PhoneNumber = () => {
                     {phone.desc}
                   </Text>
                   <Text style={styles.phoneText}>{phone.value}</Text>
-                  <TouchableOpacity onPress={() => handleEdit(phone.id)}>
-                    <Icon name="edit" size={20} color="#000000" />
-                  </TouchableOpacity>
+                  <Icon
+                    name="edit"
+                    size={20}
+                    color="#000000"
+                    onPress={() => handleEdit(phone.id)}
+                  />
                 </View>
               </>
             )}
@@ -272,103 +232,13 @@ export const PhoneNumber = () => {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    marginTop: 10,
-  },
-  buttonsContainer: {
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 3,
-    width: 250,
   },
   overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  centeredView: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 22,
-  },
-  modalView: {
-    // margin: 10,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 50,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalText: {
-    textAlign: "center",
-    fontWeight: "bold",
-    // borderWidth: 1,
-    marginRight: 35,
-    marginTop: 20,
-  },
-  modalTextNewTel: {
-    textAlign: "center",
-    fontWeight: "bold",
-    // borderWidth: 1,
-    marginRight: 55,
-    marginBottom: 10,
-  },
-  modalTextEditTel: {
-    textAlign: "center",
-    fontWeight: "bold",
-    // borderWidth: 1,
-    marginRight: 105,
-  },
-  titleModalText: {
-    marginBottom: -20,
-  },
-  modalInput: {
-    marginBottom: 25,
-    width: 250,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    textAlign: "center",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 15,
-    top: 10,
-    // marginTop: 20,
-    flexDirection: "row",
-    // marginBottom: 35,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginLeft: 200,
-    marginTop: -45,
-  },
-  modalButtonsSave: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginLeft: 230,
-    marginTop: -45,
-  },
-  buttonText: {
-    fontSize: 15,
-    textAlign: "center",
-    fontWeight: "bold",
-    marginLeft: -15,
-  },
-  buttonStyle: {
-    flexDirection: "row",
-    marginLeft: 30,
+    width: 300,
+    height: 200,
   },
   phoneContainer: {
     alignItems: "center",
@@ -385,6 +255,9 @@ const styles = StyleSheet.create({
   phoneText: {
     marginEnd: 10,
   },
+  buttonAddPhone: {
+    backgroundColor: "#FFFFFF",
+  },
   phoneAndNoteContainer: {
     flexDirection: "row",
     marginRight: 15,
@@ -396,5 +269,24 @@ const styles = StyleSheet.create({
     height: 20,
     textAlign: "center",
     color: "#000",
+  },
+  buttonEditPhone: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 200,
+  },
+  titleEditPhone: {
+    fontWeight: "bold",
+    fontSize: 15,
+    marginRight: 160,
+    width: 120,
+    marginTop: -30,
+  },
+  titleNewPhone: {
+    fontWeight: "bold",
+    fontSize: 15,
+    marginRight: 60,
+    width: 220,
+    marginTop: -30,
   },
 });

@@ -7,7 +7,7 @@ import React from "react";
 import { Alert, View } from "react-native";
 import { useAuth } from "../components/AuthContext";
 
-import { Icon, ListItem } from "react-native-elements";
+import { Icon, ListItem } from '@rneui/themed';
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { StackNavigation } from "./StackNavigation";

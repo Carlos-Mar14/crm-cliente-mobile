@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   Text,
-  Modal,
   FlatList,
-  Button,
+  
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Icon } from "react-native-elements";
+import { Icon, ListItem } from "@rneui/themed";
 import { Table, Row } from "react-native-table-component";
 import { api } from "../../utils/api";
 import { ComponentSupplyPoint } from "./ComponentSupplyPoint";
 import { SupplyPoint, ApiResponse } from "./CustomerCard";
 import CreateCupsModal from "./CreateCupsModal";
+import { render } from "@testing-library/react-native";
 
 //Este es el que lleva SupplyPointList
 export interface SupplyPointEnergy {
@@ -43,16 +42,20 @@ type SupplyPointState = SupplyPoint[] | { [key: string]: SupplyPoint[] };
 export const SupplyPointList = () => {
   const [events, setEvents] = useState<SupplyPointState>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const eventsArray = Object.entries(events).map(([address, data]) => ({
-    address,
-    data,
-  }));
+
+  const eventsArray = useMemo(() => {
+    return Object.entries(events).map(([address, data]) => ({
+      address,
+      data,
+    }));
+  }, [events]);
 
   useEffect(() => {
     getItems();
   }, []);
 
   const handleOpenModal = () => {
+    console.log("handleOpenModal called");
     setModalVisible(true);
   };
 
@@ -64,7 +67,7 @@ export const SupplyPointList = () => {
     const grouped = {};
     data.forEach((item) => {
       const address = item.full_address;
-      if (!groupAddress[address]) {
+      if (!grouped[address]) {
         grouped[address] = [];
       }
       grouped[address].push(item);
@@ -162,7 +165,7 @@ export const SupplyPointList = () => {
           return (
             <TouchableOpacity
               style={buttonStyle}
-              onPress={() => setModalVisible(true)}
+              onPress={handleOpenModal} // Llama a la función handleOpenModal
             >
               <Text style={styles.buttonAddCupsText}>{buttonText}</Text>
             </TouchableOpacity>
@@ -175,7 +178,6 @@ export const SupplyPointList = () => {
     if (!hasGas) {
       gasRow = gasRow.map((cell, index) => {
         if (index === 0) {
-          // Asumiendo que el primer elemento es el lugar para el botón
           return (
             <TouchableOpacity
               style={buttonStyle}
@@ -228,20 +230,19 @@ export const SupplyPointList = () => {
     );
   };
 
+  render () {
   return (
     <View>
       <View style={styles.searchAndButtonsContainer}>
-        <Text
-          style={{
-            fontWeight: "bold",
-            width: 170,
-            marginRight: 800,
-          }}
-        >
-          Puntos de Suministros
-        </Text>
-        <TextInput style={styles.searchInput} placeholder="Buscar por CUPS" />
-        <Icon type="material" name="search" size={33} color="#9c9c9c" />
+        <Text style={styles.titlePs}>Puntos de Suministros</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar por CUPS"
+            placeholderTextColor="#9c9c9c"
+          />
+          <Icon name="search" type="material" size={33} color="#9c9c9c" />
+        </View>
         <TouchableOpacity
           style={styles.roundButton}
           onPress={() => console.log("Agregar CUPS")}
@@ -255,7 +256,6 @@ export const SupplyPointList = () => {
           <Icon name="refresh" size={20} color="#008000" />
         </TouchableOpacity>
       </View>
-      {/* TODO: mover este modal a nuevo archivo "CreateCupsModal" */}
       <CreateCupsModal visible={modalVisible} onClose={handleCloseModal} />
 
       <View style={styles.psPadre}>
@@ -268,6 +268,7 @@ export const SupplyPointList = () => {
       </View>
     </View>
   );
+}
 };
 
 const styles = StyleSheet.create({
@@ -275,20 +276,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    width: 260,
-    marginLeft: 980,
+    width: 310,
+    height: 40,
+    marginTop: 5,
+    marginLeft: 930,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#9c9c9c",
+    borderRadius: 5,
   },
   searchInput: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginRight: -30,
+    fontSize: 16,
+    color: "#000",
+    paddingRight: 20, // Asegúrate de que el texto no se superponga con el ícono
+  },
+  titlePs: {
+    fontWeight: "bold",
+    marginRight: 780,
     width: 170,
-    borderRadius: 5,
-    padding: 5,
+    height: 20,
   },
   psPadre: {
-    height: 170,
+    height: 120,
+    borderWidth: 1,
   },
   roundButton: {
     width: 40,
@@ -323,11 +336,6 @@ const styles = StyleSheet.create({
   headText: {
     textAlign: "center",
     fontWeight: "bold",
-  },
-  flatListStyle: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 25,
   },
   flatList: {},
   buttonAddLuz: {

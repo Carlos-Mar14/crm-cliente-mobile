@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import React, { useState } from "react";
-import { Icon } from "react-native-elements";
+import { Icon } from '@rneui/themed';
 import { Picker } from "@react-native-picker/picker";
 
 export default function CreateCupsModal({ visible, onClose }) {
@@ -29,7 +29,7 @@ export default function CreateCupsModal({ visible, onClose }) {
             <View style={styles.modalView}>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
+                onPress={onClose}
               >
                 <Text style={styles.modalTextNewCupsLuz}>Ingresa CUPS LUZ</Text>
                 <Icon name="close" size={25} color="#FF0000" />
