@@ -1,7 +1,7 @@
+import { Button, Icon, Input } from '@rneui/themed';
 import { isEmpty } from "lodash";
 import React, { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
-import { Button, Icon, Input } from '@rneui/themed';
 import logo from "../../assets/wide_logo.png";
 import { validateEmail } from "../../utils/helpers";
 import { useAuth } from "../AuthContext";
@@ -32,9 +32,7 @@ export default function LoginForm() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.img}>
-        {<Image style={styles.img} source={logo} testID="logotest" />}
-      </View>
+      <Image style={styles.img} source={logo} testID="logotest" />
       <View style={styles.inputContainer}>
         <Input
           containerStyle={styles.input}
