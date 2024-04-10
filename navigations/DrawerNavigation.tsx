@@ -4,10 +4,11 @@ import {
   createDrawerNavigator,
 } from "@react-navigation/drawer";
 import React from "react";
-import { Alert, View } from "react-native";
+import { Alert } from "react-native";
 import { useAuth } from "../components/AuthContext";
 
 import { Icon, ListItem } from '@rneui/themed';
+import CustomerCardScreen from "../components/customer/CustomerCardScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { StackNavigation } from "./StackNavigation";
@@ -16,6 +17,7 @@ export type RootDrawerParams = {
   Home: undefined;
   Profile: undefined;
   Calendar: undefined;
+  CustomerCard: undefined;
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParams>();
@@ -30,10 +32,12 @@ export const DrawerNavigation = () => {
       <Drawer.Screen name="Home" component={StackNavigation} />
       <Drawer.Screen name="Calendar" component={CalendarScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name='CustomerCard' component={CustomerCardScreen} />
     </Drawer.Navigator>
   );
 };
 
+// TODO: move to separate file
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
   const { logout } = useAuth();
   const onLogout = async () => {
@@ -41,7 +45,7 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
       "Cerrar sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
       [
-        { text: "No", style: "cancel", onPress: () => {} },
+        { text: "No", style: "cancel", onPress: () => { } },
         {
           text: "Sí",
           style: "destructive",

@@ -1,40 +1,15 @@
+import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import {
-  TextInput,
-  View,
-  Button,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
+  View
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Icon, Tab, TabView } from '@rneui/themed';
 import { api } from "../../utils/api";
 import { PhoneNumber } from "./PhoneNumber";
-import { SupplyPointList, SupplyPointEnergy } from "./SupplyPointList";
-import CustomerCardTabs from "./CustomerCardTabs";
 
-export interface ApiResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: SupplyPoint[];
-}
-
-// Este es el que lleva SupplyPointDetails
-export interface SupplyPoint {
-  punto_luz?: SupplyPointEnergy;
-  punto_gas?: SupplyPointEnergy;
-  id: number;
-  full_address: string;
-  state: string;
-  create_at: string;
-  direction: string;
-  locality: string;
-  postalcode: string;
-  card: string;
-  create_by: string;
-}
 
 export interface SheetData {
   id?: number;
@@ -56,14 +31,13 @@ export interface SheetData {
   factura_en_papel?: string;
 }
 
-export const CustomerCard = () => {
+export const CustomerCard = ({ customerId }) => {
   const [nameClient, setnameClient] = useState("");
   const [statusClient, setstatusClient] = useState("");
   const [selectedClientType, setSelectedClientType] = useState("");
   const [selectedDocumentType, setSelectedDocumentType] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
-  const [idSheet, setIdSheet] = useState("");
   const [customerFile, setCustomerFile] = useState<SheetData | null>(null);
 
   useEffect(() => {
@@ -77,9 +51,6 @@ export const CustomerCard = () => {
       setCustomerFile(response.data);
       setSelectedClientType(response.data.client_type);
       setstatusClient(response.data.status);
-      if (response.data && response.data.id) {
-        setIdSheet(response.data.id.toString());
-      }
     } catch (error) {
       //console.error("Error al obtener los datos de /ficha/:", error);
       setCustomerFile(null);
@@ -101,10 +72,10 @@ export const CustomerCard = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {idSheet && (
-        <Text style={styles.fullAddressTextFicha}>Ficha: {idSheet}</Text>
-      )}
+    <View style={{ flex: 1 }}>
+      <View style={{ display: "flex", alignItems: "center", flexDirection: "row", justifyContent: "space-between" }}>
+        <Text>Ficha: {customerId}</Text>
+      </View>
       {customerFile && (
         <View style={styles.inputContainer}>
           <View style={styles.titlePhoneInputContainer}>
@@ -319,19 +290,11 @@ export const CustomerCard = () => {
         <Text style={{ fontWeight: "bold" }}>Observaciones</Text>
         <TextInput placeholder="Observaciones..."></TextInput>
       </View>
-      <View style={styles.horizontalLine} />
-      <CustomerCardTabs />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    height: 100,
-    justifyContent: "flex-start",
-    padding: 20,
-  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -459,12 +422,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000",
     borderRadius: 2,
-  },
-  fullAddressTextFicha: {
-    fontSize: 15,
-    fontWeight: "bold",
-    marginBottom: 5,
-    marginTop: -45,
-    width: 120,
   },
 });

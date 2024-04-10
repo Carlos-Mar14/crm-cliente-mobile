@@ -1,28 +1,21 @@
-import React, { useCallback, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import React, { useCallback } from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { AgendaList } from "react-native-calendars";
 import { ApiEvent } from "./CalendarScreen";
-import { ModalCustomerCard } from "../components/customer/ModalCustomerCard";
 
 const _AgendaItem = ({ event }: { event: ApiEvent }) => {
-  const [isModalVisible, setModalVisible] = useState(false);
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-
   const { name, start } = event;
   const hour = start.slice(11, 16);
+  const navigation = useNavigation();
+
+  const openCustomerCard = () => {
+    navigation.navigate('CustomerCard')
+  };
 
   return (
-    <TouchableOpacity onPress={toggleModal} style={styles.item}>
-      <View>
-        <ModalCustomerCard
-          isModalVisible={isModalVisible}
-          onClose={toggleModal}
-        />
-        <Text style={styles.itemHourText}>{hour}</Text>
-      </View>
+    <TouchableOpacity onPress={openCustomerCard} style={styles.item}>
+      <Text style={styles.itemHourText}>{hour}</Text>
       <Text style={styles.itemTitleText}>{name}</Text>
     </TouchableOpacity>
   );
