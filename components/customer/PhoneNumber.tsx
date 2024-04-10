@@ -141,7 +141,10 @@ export const PhoneNumber = () => {
         buttonStyle={styles.buttonAddPhone}
         icon={<Icon name="add" size={25} color="#008000" />}
       />
-      <Overlay isVisible={modalVisible}>
+      <Overlay
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+      >
         <View style={styles.overlay}>
           <Text style={styles.titleNewPhone}>Nuevo Número de Télefono</Text>
           <Input
@@ -165,7 +168,10 @@ export const PhoneNumber = () => {
           </View>
         </View>
       </Overlay>
-      <Overlay isVisible={editModalVisible}>
+      <Overlay
+        isVisible={editModalVisible}
+        onBackdropPress={() => setEditModalVisible(false)}
+      >
         <View style={styles.overlay}>
           <Text style={styles.titleEditPhone}>Editar Teléfono</Text>
           <Input

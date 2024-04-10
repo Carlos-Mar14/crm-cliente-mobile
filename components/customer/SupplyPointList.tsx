@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Text,
   FlatList,
-  
 } from "react-native";
 import { Icon, ListItem } from "@rneui/themed";
 import { Table, Row } from "react-native-table-component";
@@ -14,7 +13,8 @@ import { api } from "../../utils/api";
 import { ComponentSupplyPoint } from "./ComponentSupplyPoint";
 import { SupplyPoint, ApiResponse } from "./CustomerCard";
 import CreateCupsModal from "./CreateCupsModal";
-import { render } from "@testing-library/react-native";
+import SupplyPointDetails from "./SupplyPointDetails";
+import SupplyPointEnergy from "./Supply_PointEnergy";
 
 //Este es el que lleva SupplyPointList
 export interface SupplyPointEnergy {
@@ -54,11 +54,6 @@ export const SupplyPointList = () => {
     getItems();
   }, []);
 
-  const handleOpenModal = () => {
-    console.log("handleOpenModal called");
-    setModalVisible(true);
-  };
-
   const handleCloseModal = () => {
     setModalVisible(false);
   };
@@ -78,159 +73,20 @@ export const SupplyPointList = () => {
   async function getItems() {
     const response = await api.get<ApiResponse>("/puntos/");
     const groupedData = groupAddress(response.data.results);
-    //console.log("Datos obtenidos:", response.data);
+    // console.log("Datos obtenidos:", response.data);
     setEvents(groupedData);
     //console.log("Datos cargados en el estado:", events);
   }
 
-  const tableHead = [
-    "CUPS",
-    "Comerc",
-    "Tarifa",
-    "Consumo",
-    "P1",
-    "P2",
-    "P3",
-    "P4",
-    "P5",
-    "P6",
-    "Ult. Cambio de comerc",
-    "Fecha Firma",
-    "Estado",
-    "",
-  ];
-
   const renderItem = ({ item }) => {
-    let luzRow = Array(14).fill("");
-    let gasRow = Array(14).fill("");
-
-    const hasLuz = item.data.some((event) => event.punto_luz);
-    const hasGas = item.data.some((event) => event.punto_gas);
-
-    let buttonStyle;
-    let buttonText = "Agregar CUPS";
-    if (hasLuz) {
-      buttonStyle = styles.buttonAddGas;
-      buttonText = "AÑADIR CUPS GAS";
-    } else if (hasGas) {
-      buttonStyle = styles.buttonAddLuz;
-      buttonText = "AÑADIR CUPS LUZ";
-    } else {
-      buttonStyle = styles.buttonAddLuz;
-    }
-
-    item.data.forEach((event) => {
-      if (event.punto_luz) {
-        luzRow = [
-          event.punto_luz.cups,
-          event.punto_luz.company,
-          event.punto_luz.tarif,
-          event.punto_luz.consumo,
-          event.punto_luz.p1,
-          event.punto_luz.p2,
-          event.punto_luz.p3,
-          event.punto_luz.p4,
-          event.punto_luz.p5,
-          event.punto_luz.p6,
-          event.punto_luz.fecha_cambio,
-          event.punto_luz.fecha_firma,
-          event.punto_luz.status_text,
-          event.punto_luz.firma,
-        ];
-      }
-      if (event.punto_gas) {
-        gasRow = [
-          event.punto_gas.cups,
-          event.punto_gas.company,
-          event.punto_gas.tarif,
-          event.punto_gas.consumo,
-          event.punto_gas.p1,
-          event.punto_gas.p2,
-          event.punto_gas.p3,
-          event.punto_gas.p4,
-          event.punto_gas.p5,
-          event.punto_gas.p6,
-          event.punto_gas.fecha_cambio,
-          event.punto_gas.fecha_firma,
-          event.punto_gas.status_text,
-          event.punto_gas.firma,
-        ];
-      }
-    });
-
-    if (!hasLuz) {
-      luzRow = luzRow.map((cell, index) => {
-        if (index === 0) {
-          // Asumiendo que el primer elemento es el lugar para el botón
-          return (
-            <TouchableOpacity
-              style={buttonStyle}
-              onPress={handleOpenModal} // Llama a la función handleOpenModal
-            >
-              <Text style={styles.buttonAddCupsText}>{buttonText}</Text>
-            </TouchableOpacity>
-          );
-        }
-        return cell;
-      });
-    }
-
-    if (!hasGas) {
-      gasRow = gasRow.map((cell, index) => {
-        if (index === 0) {
-          return (
-            <TouchableOpacity
-              style={buttonStyle}
-              onPress={() => console.log("Agregarrrr CUPS")}
-            >
-              <Text style={styles.buttonAddCupsText}>{buttonText}</Text>
-            </TouchableOpacity>
-          );
-        }
-        return cell;
-      });
-    }
-
-    return (
-      <View key={item.address}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Icon type="material" name="location-on" size={15} color="#cb3234" />
-          <Text style={styles.fullAddressText}>{item.address}</Text>
-        </View>
-        <Table>
-          <Row
-            data={tableHead.map((headItem) => (
-              <Text style={styles.headText}>{headItem}</Text>
-            ))}
-            style={styles.head}
-            widthArr={[
-              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
-            ]}
-          />
-          <Row
-            data={luzRow.map((cellData) => (
-              <Text style={styles.textInCell}>{cellData}</Text>
-            ))}
-            style={styles.row}
-            widthArr={[
-              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
-            ]}
-          />
-          <Row
-            data={gasRow.map((cellData) => (
-              <Text style={styles.textInCell}>{cellData}</Text>
-            ))}
-            style={styles.row}
-            widthArr={[
-              190, 190, 60, 80, 35, 35, 35, 35, 35, 35, 180, 100, 130, 100,
-            ]}
-          />
-        </Table>
-      </View>
-    );
+    return item.data.map((punto, index) => (
+      <SupplyPointDetails key={index} punto={punto} children={undefined}>
+        {/* <SupplyPointEnergy data={luzRow} />
+        <SupplyPointEnergy data={gasRow} /> */}
+      </SupplyPointDetails>
+    ));
   };
 
-  render () {
   return (
     <View>
       <View style={styles.searchAndButtonsContainer}>
@@ -268,9 +124,9 @@ export const SupplyPointList = () => {
       </View>
     </View>
   );
-}
 };
 
+//TODO: limpiar estilos!
 const styles = StyleSheet.create({
   searchAndButtonsContainer: {
     flexDirection: "row",
@@ -300,7 +156,8 @@ const styles = StyleSheet.create({
     height: 20,
   },
   psPadre: {
-    height: 120,
+    marginTop: -200, //TODO: Estilo temporal
+    height: 300,
     borderWidth: 1,
   },
   roundButton: {
