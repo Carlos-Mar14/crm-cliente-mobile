@@ -1,94 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { Picker } from "@react-native-picker/picker";
+import React from "react";
 import {
-  TextInput,
-  View,
-  Button,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
+  View
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Icon, Tab, TabView } from '@rneui/themed';
-import { api } from "../../utils/api";
 import { PhoneNumber } from "./PhoneNumber";
-import { SupplyPointList, SupplyPointEnergy } from "./SupplyPointList";
-import CustomerCardTabs from "./CustomerCardTabs";
+import { useCustomer } from "./hooks/customer";
 
-export interface ApiResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: SupplyPoint[];
-}
-
-// Este es el que lleva SupplyPointDetails
-export interface SupplyPoint {
-  punto_luz?: SupplyPointEnergy;
-  punto_gas?: SupplyPointEnergy;
-  id: number;
-  full_address: string;
-  state: string;
-  create_at: string;
-  direction: string;
-  locality: string;
-  postalcode: string;
-  card: string;
-  create_by: string;
-}
-
-export interface SheetData {
-  id?: number;
-  name?: string;
-  agent?: string;
-  operator?: string;
-  last_modified?: string;
-  created_at?: string;
-  status?: string;
-  persona_contacto?: string;
-  email?: string;
-  cargo?: string;
-  schedule?: string;
-  cnae?: string; // CNAE
-  persona_contacto_email?: string;
-  client_type?: string;
-  document_type?: string;
-  dni?: string;
-  factura_en_papel?: string;
-}
-
-export const CustomerCard = () => {
-  const [nameClient, setnameClient] = useState("");
-  const [statusClient, setstatusClient] = useState("");
-  const [selectedClientType, setSelectedClientType] = useState("");
-  const [selectedDocumentType, setSelectedDocumentType] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-
-  const [idSheet, setIdSheet] = useState("");
-  const [customerFile, setCustomerFile] = useState<SheetData | null>(null);
-
-  useEffect(() => {
-    getSheetItems();
-  }, []);
-
-  async function getSheetItems() {
-    try {
-      const response = await api.get<SheetData>("/ficha/");
-      //console.log("Datos obtenidos de /ficha/:", response.data);
-      setCustomerFile(response.data);
-      setSelectedClientType(response.data.client_type);
-      setstatusClient(response.data.status);
-      if (response.data && response.data.id) {
-        setIdSheet(response.data.id.toString());
-      }
-    } catch (error) {
-      //console.error("Error al obtener los datos de /ficha/:", error);
-      setCustomerFile(null);
-    }
-  }
-
-  const handleButtonPress = (estado) => {
-    setstatusClient(estado);
-  };
+export const CustomerCard = ({ customerId }) => {
+  const { customer } = useCustomer();
 
   const statusColors = {
     Firmado: "rgba(0, 128, 0, 0.7)",
@@ -100,121 +23,109 @@ export const CustomerCard = () => {
     "Proceso aceptacion": "rgba(0, 82, 255, 0.9)",
   };
 
+  if (!customer) {
+    return <Text>Cargando...</Text>;
+  }
+
   return (
-    <View style={styles.container}>
-      {idSheet && (
-        <Text style={styles.fullAddressTextFicha}>Ficha: {idSheet}</Text>
-      )}
-      {customerFile && (
-        <View style={styles.inputContainer}>
-          <View style={styles.titlePhoneInputContainer}>
-            <View style={styles.titleInputContainer}>
-              <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
-              <TextInput
-                style={styles.inputClient}
-                onChangeText={setnameClient}
-                value={customerFile.name}
-                placeholder="Escribe el nombre..."
-              />
-            </View>
-            <View>
-              <PhoneNumber />
-            </View>
-          </View>
-          <View style={styles.statusClient}>
-            <View
-              style={{
-                backgroundColor: statusColors[statusClient],
-                marginTop: -3,
-              }}
-            >
-              <Text style={styles.estadoText}>Estado:</Text>
-              <Text
-                style={{
-                  ...styles.estadoText,
-                  marginTop: -13,
-                  marginBottom: -1,
-                }}
-              >
-                {statusClient}
-              </Text>
-            </View>
-            <Text style={{ fontWeight: "bold" }}>Nombre Agente</Text>
-            <TextInput style={styles.textInput} value={customerFile.agent} />
-            <Text style={{ fontWeight: "bold" }}>Operador</Text>
-            <TextInput style={styles.textInput} value={customerFile.operator} />
-            <Text style={{ fontWeight: "bold" }}>Ultimo Cambio</Text>
+    <View style={{ flex: 1 }}>
+      <Text>Ficha: {customerId}</Text>
+
+      <View style={styles.inputContainer}>
+        <View style={styles.titlePhoneInputContainer}>
+          <View style={styles.titleInputContainer}>
+            <Text style={{ fontWeight: "bold" }}>Nombre Cliente/Titular</Text>
             <TextInput
-              style={styles.textInput}
-              value={customerFile.last_modified}
-              editable={false}
-            />
-            <Text style={{ fontWeight: "bold" }}>Fecha Vencimiento</Text>
-            <TextInput
-              style={styles.textInput}
-              value={customerFile.created_at}
+              style={styles.inputClient}
+              value={customer.name}
+              placeholder="Escribe el nombre..."
             />
           </View>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(0, 128, 0, 0.7)" },
-              ]}
-              onPress={() => handleButtonPress("Firmado")}
-            >
-              <Text style={styles.buttonText}>Firmado</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(255, 128, 0, 0.9)" },
-              ]}
-              onPress={() => handleButtonPress("Aplazada con fecha")}
-            >
-              <Text style={styles.buttonText}>Aplazada con fecha</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(0, 82, 255, 0.9))" },
-              ]}
-              onPress={() => handleButtonPress("Proceso de aceptacion")}
-            >
-              <Text style={styles.buttonText}>Proceso de aceptacion</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(0, 82, 255, 0.9)" },
-              ]}
-              onPress={() => handleButtonPress("Estudio enviado")}
-            >
-              <Text style={styles.buttonText}>Estudio enviado</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(255, 0, 0, 0.8)" },
-              ]}
-              onPress={() => handleButtonPress("Mal Contacto")}
-            >
-              <Text style={styles.buttonText}>Mal Contacto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttonStyle,
-                { backgroundColor: "rgba(255, 0, 0, 0.8)" },
-              ]}
-              onPress={() => handleButtonPress("No firmado")}
-            >
-              <Text style={styles.buttonText}>No firmado</Text>
-            </TouchableOpacity>
+          <View>
+            <PhoneNumber />
           </View>
         </View>
-      )}
+        <View style={styles.statusClient}>
+          <View
+            style={{
+              backgroundColor: statusColors[customer.status],
+              marginTop: -3,
+            }}
+          >
+            <Text style={styles.estadoText}>Estado:</Text>
+            <Text
+              style={{
+                ...styles.estadoText,
+                marginTop: -13,
+                marginBottom: -1,
+              }}
+            >
+              {customer.status}
+            </Text>
+          </View>
+          <Text style={{ fontWeight: "bold" }}>Nombre Agente</Text>
+          <TextInput style={styles.textInput} value={customer.agent} />
+          <Text style={{ fontWeight: "bold" }}>Operador</Text>
+          <TextInput style={styles.textInput} value={customer.operator} />
+          <Text style={{ fontWeight: "bold" }}>Fecha Vencimiento</Text>
+          <TextInput
+            style={styles.textInput}
+            value={customer.created_at}
+          />
+        </View>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(0, 128, 0, 0.7)" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Firmado</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(255, 128, 0, 0.9)" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Aplazada con fecha</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(0, 82, 255, 0.9))" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Proceso de aceptacion</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(0, 82, 255, 0.9)" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Estudio enviado</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(255, 0, 0, 0.8)" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Mal Contacto</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonStyle,
+              { backgroundColor: "rgba(255, 0, 0, 0.8)" },
+            ]}
+          >
+            <Text style={styles.buttonText}>No firmado</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       <View style={styles.horizontalLine} />
-      {customerFile && (
+      {customer && (
         <View style={styles.inputRow}>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold", marginLeft: -25 }}>
@@ -222,27 +133,27 @@ export const CustomerCard = () => {
             </Text>
             <TextInput
               style={styles.namePersonContac}
-              placeholder={customerFile.persona_contacto}
+              placeholder={customer.persona_contacto}
             />
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>Email Interlocutor</Text>
-            <TextInput style={styles.input} placeholder={customerFile.email} />
+            <TextInput style={styles.input} placeholder={customer.email} />
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>Cargo</Text>
-            <TextInput style={styles.input} placeholder={customerFile.cargo} />
+            <TextInput style={styles.input} placeholder={customer.cargo} />
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>Horario</Text>
             <TextInput
               style={styles.input}
-              placeholder={customerFile.schedule}
+              placeholder={customer.schedule}
             />
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>CNAE</Text>
-            <TextInput style={styles.input} placeholder={customerFile.cnae} />
+            <TextInput style={styles.input} placeholder={customer.cnae} />
           </View>
         </View>
       )}
@@ -251,61 +162,43 @@ export const CustomerCard = () => {
       <Text style={{ fontWeight: "bold", marginBottom: -15 }}>
         Datos del Cliente
       </Text>
-      {customerFile && (
+      {customer && (
         <View style={styles.inputRowClient}>
           <TextInput
             style={styles.inputDateClient}
-            placeholder={customerFile.persona_contacto_email}
+            placeholder={customer.persona_contacto_email}
           />
           <View style={styles.inputPickerTypeDocument}>
             <Text style={{ fontWeight: "bold", marginTop: -22 }}>
               Tipo de Cliente
             </Text>
             <Picker
-              selectedValue={selectedClientType}
+              selectedValue={customer.client_type}
               style={styles.inputDateClientPicker}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedClientType(itemValue)
-              }
-            >
-              <Picker.Item label="Cliente J" value="J" />
-              <Picker.Item label="Cliente K" value="K" />
-              <Picker.Item label="Cliente M" value="M" />
-            </Picker>
+            />
           </View>
           <View style={styles.inputPickerTypeDocument}>
             <Text style={{ fontWeight: "bold", marginTop: -22 }}>
               Tipo de Documento
             </Text>
             <Picker
-              selectedValue={selectedDocumentType}
               style={styles.inputDateClientPicker}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedDocumentType(itemValue)
-              }
             >
               <Picker.Item label="DNI" value="DNI" />
               <Picker.Item label="Pasaporte" value="Pasaporte" />
-              <Picker.Item
-                label="Carnet de Extranjería"
-                value="Carnet de Extranjería"
-              />
             </Picker>
           </View>
           <View style={styles.containerNumberDocument}>
             <Text style={{ fontWeight: "bold" }}>Numero de documento</Text>
-            <TextInput style={styles.input} placeholder={customerFile.dni} />
+            <TextInput style={styles.input} placeholder={customer.dni} />
           </View>
           <View style={styles.inputPickerTypeDocument}>
             <Text style={{ fontWeight: "bold", marginTop: -22 }}>
               Factura en Papel
             </Text>
             <Picker
-              selectedValue={selectedDate}
+              selectedValue={customer.factura_en_papel}
               style={styles.inputDateClientPicker}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedDate(itemValue)
-              }
             >
               <Picker.Item label="Si" value="Si" />
               <Picker.Item label="No" value="No" />
@@ -319,19 +212,11 @@ export const CustomerCard = () => {
         <Text style={{ fontWeight: "bold" }}>Observaciones</Text>
         <TextInput placeholder="Observaciones..."></TextInput>
       </View>
-      <View style={styles.horizontalLine} />
-      <CustomerCardTabs />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    height: 100,
-    justifyContent: "flex-start",
-    padding: 20,
-  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -459,12 +344,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000",
     borderRadius: 2,
-  },
-  fullAddressTextFicha: {
-    fontSize: 15,
-    fontWeight: "bold",
-    marginBottom: 5,
-    marginTop: -45,
-    width: 120,
   },
 });
