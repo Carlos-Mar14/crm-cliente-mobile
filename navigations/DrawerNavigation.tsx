@@ -3,17 +3,17 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from "@react-navigation/drawer";
+import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
-import { Alert, View } from "react-native";
+import { Alert, View, Text } from "react-native";
 import { useAuth } from "../components/AuthContext";
 
-import { Icon, ListItem } from '@rneui/themed';
+import { Icon, ListItem } from "@rneui/themed";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
-import { StackNavigation } from "./StackNavigation";
+import LoginForm from "../components/account/LoginForm";
 
 export type RootDrawerParams = {
-  Home: undefined;
   Profile: undefined;
   Calendar: undefined;
 };
@@ -21,18 +21,23 @@ export type RootDrawerParams = {
 const Drawer = createDrawerNavigator<RootDrawerParams>();
 
 export const DrawerNavigation = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
+  if (loading) return <Text>Cargando...</Text>;
+  if (!isLoggedIn) return <LoginForm />;
+
   return (
-    <Drawer.Navigator
-      screenOptions={{ headerShown: isLoggedIn }}
-      drawerContent={DrawerContent}
-    >
-      <Drawer.Screen name="Home" component={StackNavigation} />
-      <Drawer.Screen name="Calendar" component={CalendarScreen} />
-      <Drawer.Screen name="Profile" component={ProfileScreen} />
-    </Drawer.Navigator>
+    <NavigationContainer>
+      <Drawer.Navigator
+        screenOptions={{ headerShown: isLoggedIn }}
+        drawerContent={DrawerContent}
+      >
+        <Drawer.Screen name="Calendar" component={CalendarScreen} />
+        <Drawer.Screen name="Profile" component={ProfileScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
 };
+
 
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
   const { logout } = useAuth();
