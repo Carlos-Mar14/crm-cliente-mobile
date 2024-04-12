@@ -10,7 +10,7 @@ const _AgendaItem = ({ event }: { event: ApiEvent }) => {
   const navigation = useNavigation();
 
   const openCustomerCard = () => {
-    navigation.navigate('CustomerCard')
+    navigation.navigate("CustomerCard", { customerId: event.card_id });
   };
 
   return (
