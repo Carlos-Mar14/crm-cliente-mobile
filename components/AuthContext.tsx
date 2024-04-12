@@ -1,8 +1,12 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
-import { api, getToken, refreshToken, removeToken, saveToken } from '../utils/api';
-
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Alert } from "react-native";
+import {
+  api,
+  getToken,
+  refreshToken,
+  removeToken,
+  saveToken,
+} from "../utils/api";
 
 interface LoginData {
   email: string;
@@ -12,29 +16,28 @@ interface LoginData {
 const AuthContext = createContext({
   isLoggedIn: false,
   loading: true,
-  login: (data: LoginData) => { },
-  logout: () => { },
+  login: (data: LoginData) => {},
+  logout: () => {},
 });
 
 const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigation = useNavigation();
 
   useEffect(() => {
     checkAuth();
   }, []);
 
   const login = async (loginData: LoginData) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await api.post('/token-auth/', loginData);
+      const response = await api.post("/token-auth/", loginData);
       await saveToken(response.data.token);
-      navigation.navigate("Calendar");
+      setIsLoggedIn(true);
     } catch (error) {
       Alert.alert("Error", error?.response?.data || error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -44,21 +47,21 @@ const AuthProvider = ({ children }) => {
   };
 
   const checkAuth = async () => {
-    setLoading(true)
+    setLoading(true);
     const token = await getToken();
     if (token) {
       try {
         await refreshToken(token);
         setIsLoggedIn(true);
       } catch (error) {
-        setIsLoggedIn(false)
-        await removeToken()
+        setIsLoggedIn(false);
+        await removeToken();
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     } else {
       setIsLoggedIn(false);
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -74,5 +77,3 @@ export default AuthProvider;
 export const useAuth = () => {
   return useContext(AuthContext);
 };
-
-

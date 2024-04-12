@@ -8,6 +8,19 @@ const api = axios.create({
   baseURL: API_URL_SERVER,
 });
 
+api.interceptors.request.use(
+  // log all requests
+  (config) => {
+    console.log(config);
+    return config;
+  },
+  (error) => {
+    console.error(error);
+    return Promise.reject(error);
+  }
+)
+
+
 if (MODE === 'offline') {  
   api.post = (args) => {
     console.log(args)
