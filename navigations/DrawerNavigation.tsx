@@ -25,14 +25,17 @@ export const DrawerNavigation = () => {
   const { isLoggedIn, loading } = useAuth();
   if (loading) return <Text>Cargando...</Text>;
   if (!isLoggedIn) return <LoginForm />;
-  <Drawer.Navigator
-    screenOptions={{ headerShown: isLoggedIn }}
-    drawerContent={DrawerContent}
-  >
-    <Drawer.Screen name="Calendar" component={CalendarScreen} />
-    <Drawer.Screen name="Profile" component={ProfileScreen} />
-    <Drawer.Screen name="CustomerCard" component={CustomerCardScreen} />
-  </Drawer.Navigator>;
+
+  return (
+    <Drawer.Navigator
+      screenOptions={{ headerShown: isLoggedIn }}
+      drawerContent={DrawerContent}
+    >
+      <Drawer.Screen name="Calendar" component={CalendarScreen} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="CustomerCard" component={CustomerCardScreen}  />
+    </Drawer.Navigator>
+  );
 };
 
 // TODO: move to separate file
@@ -59,12 +62,12 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
   const menuItems = [
     {
       title: "Agenda",
-      onPress: () => navigation.navigate("CalendarScreen"),
+      onPress: () => navigation.navigate("Calendar"),
       icon: "calendar",
     },
     {
       title: "Perfil",
-      onPress: () => navigation.navigate("ProfileScreen"),
+      onPress: () => navigation.navigate("Profile"),
       icon: "account",
     },
     {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View, BackHandler  } from "react-native";
+import { StyleSheet, View, BackHandler } from "react-native";
 import {
   Calendar,
   CalendarProvider,
@@ -9,7 +9,7 @@ import { CustomDayComponent } from "../components/calendar/CustomDayComponent";
 import Toolbar from "../components/common/Toolbar";
 import { api } from "../utils/api";
 import { AgendaView } from "./AgendaView";
-import { subDays, addDays, format} from "date-fns"
+import { subDays, addDays, format, parseISO } from "date-fns";
 const dateFromIso = (ds: Date | string): string =>
   (ds instanceof Date ? ds.toISOString() : ds).split("T")[0];
 
@@ -18,7 +18,7 @@ export interface ApiEvent {
   start: string;
   end: string;
   type: string;
-  card_id: string;
+  card_id: Number;
   status: string;
   color: string;
   human_type: string;
@@ -27,38 +27,48 @@ export interface ApiEvent {
   contract_id?: number;
 }
 
-
 export const CalendarScreen = () => {
   const [showAgenda, setShowAgenda] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dateFromIso(new Date()));
-  const [events, setEvents] = useState<{ [dateString: string]: ApiEvent[] }>({});
+  const [events, setEvents] = useState<{ [dateString: string]: ApiEvent[] }>(
+    {}
+  );
 
   useEffect(() => {
     getItems();
   }, []);
 
-  const apiEventsToAgendaEvents = (apiEvents: ApiEvent[]): { [dateString: string]: ApiEvent[] } => {
+  const apiEventsToAgendaEvents = (
+    apiEvents: ApiEvent[]
+  ): { [dateString: string]: ApiEvent[] } => {
     return apiEvents.reduce((accumulator, event) => {
       const dateString = dateFromIso(event.start);
       if (accumulator[dateString]) {
-        accumulator[dateString].push(event)
+        accumulator[dateString].push(event);
       } else {
-        accumulator[dateString] = [event]
+        accumulator[dateString] = [event];
       }
-      return accumulator
-    }, {})
+      return accumulator;
+    }, {});
   };
 
   async function getItems() {
-    const { data }: { data: ApiEvent[] } = await api.get("/agent_agenda/agenda/");
+    const month = parseISO(selectedDate).getMonth() + 1;
+    const year = parseISO(selectedDate).getFullYear();
+    const { data }: { data: ApiEvent[] } = await api.get(
+      "/agent_agenda/agenda/",
+      { params: { month, year } }
+    );
     const agendaEvents = apiEventsToAgendaEvents(data);
     setEvents(agendaEvents);
   }
-  const onDayPress = useCallback((dateString) => {
-    setSelectedDate(dateString);
-    if (!showAgenda && events[dateString]) setShowAgenda(true);
-   }, [showAgenda, events]);
-   
+  const onDayPress = useCallback(
+    (dateString) => {
+      setSelectedDate(dateString);
+      if (!showAgenda && events[dateString]) setShowAgenda(true);
+    },
+    [showAgenda, events]
+  );
 
   LocaleConfig.locales["es"] = {
     monthNames: [
@@ -103,23 +113,24 @@ export const CalendarScreen = () => {
   };
   LocaleConfig.defaultLocale = "es";
 
-  const isToday = (dateString: string) => dateString === dateFromIso(new Date());
+  const isToday = (dateString: string) =>
+    dateString === dateFromIso(new Date());
 
   useEffect(() => {
     const returnMonth = () => {
-      if(showAgenda){
-        setShowAgenda(false)
-        return true
+      if (showAgenda) {
+        setShowAgenda(false);
+        return true;
       }
-      return false
+      return false;
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       returnMonth
-    )
-    return () => backHandler.remove()
-  }), [showAgenda]
-
+    );
+    return () => backHandler.remove();
+  }),
+    [showAgenda];
 
   return (
     <View style={styles.container}>
@@ -130,46 +141,47 @@ export const CalendarScreen = () => {
           {
             title: "Día anterior",
             style: {
-              backgroundColor: 'lightblue',
+              backgroundColor: "lightblue",
             },
             onPress: () => {
-              const currentDate = new Date(selectedDate)
-              const dayBefore = subDays(currentDate, 1)
-              const dayBeforeString =  format(dayBefore, "yyyy-MM-dd")
-              setSelectedDate(dayBeforeString)
-            }
+              const currentDate = new Date(selectedDate);
+              const dayBefore = subDays(currentDate, 1);
+              const dayBeforeString = format(dayBefore, "yyyy-MM-dd");
+              setSelectedDate(dayBeforeString);
+            },
           },
           {
             title: "Hoy",
             style: {
-              backgroundColor: 'lightblue',
+              backgroundColor: "lightblue",
             },
             onPress: () => {
-              const currentDate = new Date()
-              const today= (currentDate)
-              const todayString = format(today, "yyyy-MM-dd")
-              setSelectedDate(todayString)
-            }
+              const currentDate = new Date();
+              const today = currentDate;
+              const todayString = format(today, "yyyy-MM-dd");
+              setSelectedDate(todayString);
+            },
           },
           {
             title: "Día siguiente",
             style: {
-              backgroundColor: 'lightblue',
+              backgroundColor: "lightblue",
             },
             onPress: () => {
-              const currentDate = new Date(selectedDate)
+              const currentDate = new Date(selectedDate);
               // const dyaAfter = addDays(currentDate, 1)
               // const dayAfterString = format(dyaAfter, "yyyy-MM-dd")
               // setSelectedDate(dayAfterString)
 
-              setSelectedDate(format(addDays(currentDate,1), "yyyy-MM-dd"))
-            }
-          }
+              setSelectedDate(format(addDays(currentDate, 1), "yyyy-MM-dd"));
+            },
+          },
         ]}
       />
 
       <CalendarProvider date={selectedDate} onDateChanged={setSelectedDate}>
-        {showAgenda ? (<AgendaView title={selectedDate} events={events[selectedDate]} />
+        {showAgenda ? (
+          <AgendaView title={selectedDate} events={events[selectedDate]} />
         ) : (
           <Calendar
             current={selectedDate}
@@ -185,7 +197,6 @@ export const CalendarScreen = () => {
           />
         )}
       </CalendarProvider>
-
     </View>
   );
 };
@@ -227,7 +238,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     borderRadius: 5,
     padding: 10,
   },

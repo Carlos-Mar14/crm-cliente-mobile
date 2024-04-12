@@ -5,14 +5,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { PhoneNumber } from "./PhoneNumber";
 import { useCustomer } from "./hooks/customer";
 
 export const CustomerCard = ({ customerId }) => {
-  const { customer } = useCustomer();
-
+  const { customer } = useCustomer(customerId);
   const statusColors = {
     Firmado: "rgba(0, 128, 0, 0.7)",
     "Aplazada con fecha": "rgba(255, 128, 0, 0.9)",
@@ -42,7 +41,7 @@ export const CustomerCard = ({ customerId }) => {
             />
           </View>
           <View>
-            <PhoneNumber />
+            <PhoneNumber customerId={customerId} />
           </View>
         </View>
         <View style={styles.statusClient}>
@@ -68,10 +67,7 @@ export const CustomerCard = ({ customerId }) => {
           <Text style={{ fontWeight: "bold" }}>Operador</Text>
           <TextInput style={styles.textInput} value={customer.operator} />
           <Text style={{ fontWeight: "bold" }}>Fecha Vencimiento</Text>
-          <TextInput
-            style={styles.textInput}
-            value={customer.created_at}
-          />
+          <TextInput style={styles.textInput} value={customer.created_at} />
         </View>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
@@ -146,10 +142,7 @@ export const CustomerCard = ({ customerId }) => {
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>Horario</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={customer.schedule}
-            />
+            <TextInput style={styles.input} placeholder={customer.schedule} />
           </View>
           <View style={styles.titleClientContactContainer}>
             <Text style={{ fontWeight: "bold" }}>CNAE</Text>
@@ -181,9 +174,7 @@ export const CustomerCard = ({ customerId }) => {
             <Text style={{ fontWeight: "bold", marginTop: -22 }}>
               Tipo de Documento
             </Text>
-            <Picker
-              style={styles.inputDateClientPicker}
-            >
+            <Picker style={styles.inputDateClientPicker}>
               <Picker.Item label="DNI" value="DNI" />
               <Picker.Item label="Pasaporte" value="Pasaporte" />
             </Picker>
