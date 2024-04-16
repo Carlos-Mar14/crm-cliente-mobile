@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 
 export const ProfileScreen = () => {
   return (
@@ -7,13 +7,12 @@ export const ProfileScreen = () => {
       <Text>Pantalla Perfil</Text>
     </View>
   )
-} 
+}
 
 const styles = StyleSheet.create({
   input: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      flex: 1
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
   },
-
 })

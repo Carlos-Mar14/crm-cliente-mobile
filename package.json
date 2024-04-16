@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "jest": {
     "setupFiles": [
@@ -64,8 +65,11 @@
     "@testing-library/react-native": "^12.4.3",
     "@types/jest": "^29.5.12",
     "@types/react-native-table-component": "^1.2.8",
+    "eslint": "^8.57.0",
+    "eslint-config-universe": "^12.0.0",
     "jest-mock-axios": "^4.7.3",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "prettier": "^3.2.5"
   },
   "private": true
 }
