@@ -35,7 +35,12 @@ const AuthProvider = ({ children }) => {
       await saveToken(response.data.token);
       setIsLoggedIn(true);
     } catch (error) {
-      Alert.alert("Error", error?.response?.data || error);
+      if (error?.response?.data) {
+        Alert.alert("Error", String(error?.response?.data));
+      } else {
+        Alert.alert("Error", 'Error de la red');
+      }
+      console.error(error)
     } finally {
       setLoading(false);
     }
