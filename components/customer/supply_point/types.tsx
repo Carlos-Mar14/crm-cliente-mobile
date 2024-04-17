@@ -1,66 +1,72 @@
 export interface ApiResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: SupplyPoint[];
+  [key: string]: string | number | SupplyPoint[] | null
+
+  count: number
+  next: string | null
+  previous: string | null
+  results: SupplyPoint[]
 }
 
 export interface SupplyPoint {
-  punto_luz?: SupplyPointEnergy;
-  punto_gas?: SupplyPointEnergy;
-  id: number;
-  full_address: string;
-  state: string;
-  create_at: string;
-  direction: string;
-  locality: string;
-  postalcode: string;
-  card: string;
-  create_by: string;
+  [key: string]: string | number | SupplyPointEnergy | null | boolean
+
+  id: number
+  full_address: string | null
+  punto_luz: SupplyPointEnergy | null
+  punto_gas: SupplyPointEnergy | null
+  state: number | null
+  created_at: string | null
+  direction: string | null
+  locality: string | null
+  postalcode: string | null
+  is_default: boolean
+  card: number
+  created_by: number | null
 }
 export interface SupplyPointEnergy {
-  id: number;
-  files: string;
-  cups: string;
-  company: string;
-  tarif: string;
-  consumo: number;
-  p1: number;
-  p2: number;
-  p3: number;
-  p4: number;
-  p5: number;
-  p6: number;
-  fecha_cambio: string;
-  fecha_firma: string;
-  status_text: string;
-  status: string;
-  firma: string;
+  [key: string]: string | number | null | string[]
+
+  id: number
+  files: string[]
+  fecha_firma: string | null
+  fecha_cambio: string | null
+  cups: string
+  status_text: string | null
+  status: number | null
+  company: string
+  tarif: string
+  p1: number
+  p2: number
+  p3: number
+  p4: number
+  p5: number
+  p6: number
+  consumo: number | null
 }
 
 export const supplyPointHeaders = [
   {
-    text: "CUPS",
-    value: "cups",
+    text: 'CUPS',
+    value: 'cups',
   },
   {
-    text: "Comerc",
-    value: "company",
+    text: 'Comerc',
+    value: 'company',
   },
   {
-    text: "Consumo",
-    value: "consumo",
+    text: 'Consumo',
+    value: 'consumo',
   },
   {
-    text: "Tarifa",
-    value: "tarif",
+    text: 'Tarifa',
+    value: 'tarif',
   },
   ...Array.from({ length: 6 }, (_, i) => ({
     text: `P${i + 1}`,
     value: `p${i + 1}`,
   })),
   {
-    text: "Estado",
-    value: "status",
+    text: 'Estado',
+    value: 'status',
   },
-];
+]
