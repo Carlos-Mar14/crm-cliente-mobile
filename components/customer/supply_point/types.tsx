@@ -67,6 +67,69 @@ export const supplyPointHeaders = [
   })),
   {
     text: 'Estado',
-    value: 'status',
+    value: 'status_text',
   },
 ]
+
+export const supplyPointStatusMap = {
+  0: {
+    text: 'Firmado',
+    value: 0,
+    color: 'green',
+  },
+  1: {
+    text: 'Fidelizable',
+    value: 1,
+    color: 'green',
+  },
+  2: {
+    text: 'Proceso aceptacion',
+    value: 2,
+    color: 'blue',
+  },
+  3: {
+    text: 'Pendiente factura',
+    value: 3,
+    color: 'blue',
+  },
+  4: {
+    text: 'Estudio realizado',
+    value: 4,
+    color: 'blue',
+  },
+  5: {
+    text: 'Estudio enviado',
+    value: 5,
+    color: 'blue',
+  },
+  6: {
+    text: 'Factura recibida',
+    value: 6,
+    color: 'blue',
+  },
+  7: {
+    text: 'No interesa',
+    value: 7,
+    color: 'red',
+  },
+  8: {
+    text: 'Futuras ofertas',
+    value: 8,
+    color: 'blue',
+  },
+  9: {
+    text: 'No lo tiene',
+    value: 9,
+    color: 'red',
+  },
+  10: {
+    text: 'No firmado',
+    value: 10,
+    color: 'red',
+  },
+  11: {
+    text: 'Sin estado',
+    value: null,
+    color: 'grey',
+  },
+}
