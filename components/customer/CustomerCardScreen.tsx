@@ -3,6 +3,7 @@ import { BottomNavigation, Text } from 'react-native-paper'
 import { CustomerCard } from './CustomerCard'
 import { SupplyPointList } from './supply_point/SupplyPointList'
 import Comments from './ComponentComments'
+import ComponentDocuments from './ComponentDocuments'
 
 export default function CustomerCardScreen({ route }) {
   const { customerId } = route.params
@@ -38,7 +39,7 @@ export default function CustomerCardScreen({ route }) {
     card: () => <CustomerCard customerId={customerId} />,
     comments: () => <Comments customerId={customerId} />,
     ps: () => <SupplyPointList customerId={customerId} />,
-    doc: () => <Text>DOC...</Text>,
+    doc: () => <ComponentDocuments customerId={customerId} />,
   })
 
   if (!customerId) {
