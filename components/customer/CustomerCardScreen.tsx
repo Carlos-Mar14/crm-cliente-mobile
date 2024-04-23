@@ -5,8 +5,14 @@ import { SupplyPointList } from './supply_point/SupplyPointList'
 import Comments from './ComponentComments'
 import ComponentDocuments from './ComponentDocuments'
 
-export default function CustomerCardScreen({ route }) {
+export default function CustomerCardScreen({ route, navigation }) {
   const { customerId } = route.params
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: `Ficha: ${customerId}`,
+    })
+  }, [customerId, navigation])
 
   const [index, setIndex] = useState(0)
   const routes = [

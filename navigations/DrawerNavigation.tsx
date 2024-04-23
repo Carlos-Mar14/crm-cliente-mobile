@@ -2,91 +2,81 @@ import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   createDrawerNavigator,
-} from "@react-navigation/drawer";
-import React from "react";
-import { Alert } from "react-native";
-import { useAuth } from "../components/AuthContext";
+} from '@react-navigation/drawer'
+import React, { useState } from 'react'
+import { Alert } from 'react-native'
+import { useAuth } from '../components/AuthContext'
 
-import { Icon, ListItem, Text } from "@rneui/themed";
-import CustomerCardScreen from "../components/customer/CustomerCardScreen";
-import { CalendarScreen } from "../screens/CalendarScreen";
-import { ProfileScreen } from "../screens/ProfileScreen";
-import LoginForm from "../components/account/LoginForm";
+import { Icon, ListItem, Text } from '@rneui/themed'
+import CustomerCardScreen from '../components/customer/CustomerCardScreen'
+import { CalendarScreen } from '../screens/CalendarScreen'
+import { ProfileScreen } from '../screens/ProfileScreen'
+import LoginForm from '../components/account/LoginForm'
 
 export type RootDrawerParams = {
-  Profile: undefined;
-  Calendar: undefined;
-  CustomerCard: undefined;
-};
+  Profile: undefined
+  Calendar: undefined
+  Ficha: undefined
+}
 
-const Drawer = createDrawerNavigator<RootDrawerParams>();
+const Drawer = createDrawerNavigator<RootDrawerParams>()
 
 export const DrawerNavigation = () => {
-  const { isLoggedIn, loading } = useAuth();
-  if (loading) return <Text>Cargando...</Text>;
-  if (!isLoggedIn) return <LoginForm />;
+  const [fichaTitle, setFichaTitle] = useState('Ficha')
+  const { isLoggedIn, loading } = useAuth()
+  if (loading) return <Text>Cargando...</Text>
+  if (!isLoggedIn) return <LoginForm />
 
   return (
-    <Drawer.Navigator
-      screenOptions={{ headerShown: isLoggedIn }}
-      drawerContent={DrawerContent}
-    >
+    <Drawer.Navigator screenOptions={{ headerShown: isLoggedIn }} drawerContent={DrawerContent}>
       <Drawer.Screen name="Calendar" component={CalendarScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
-      <Drawer.Screen name="CustomerCard" component={CustomerCardScreen}  />
+      <Drawer.Screen name="Ficha" component={CustomerCardScreen} options={{ title: fichaTitle }} />
     </Drawer.Navigator>
-  );
-};
+  )
+}
 
 // TODO: move to separate file
 const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
-  const { logout } = useAuth();
+  const { logout } = useAuth()
   const onLogout = async () => {
-    Alert.alert(
-      "Cerrar sesión",
-      "¿Estás seguro de que quieres cerrar sesión?",
-      [
-        { text: "No", style: "cancel", onPress: () => {} },
-        {
-          text: "Sí",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            navigation.closeDrawer(); // Cierra el Drawer
-          },
+    Alert.alert('Cerrar sesión', '¿Estás seguro de que quieres cerrar sesión?', [
+      { text: 'No', style: 'cancel', onPress: () => {} },
+      {
+        text: 'Sí',
+        style: 'destructive',
+        onPress: async () => {
+          await logout()
+          navigation.closeDrawer() // Cierra el Drawer
         },
-      ]
-    );
-  };
+      },
+    ])
+  }
 
   const menuItems = [
     {
-      title: "Agenda",
-      onPress: () => navigation.navigate("Calendar"),
-      icon: "calendar",
+      title: 'Agenda',
+      onPress: () => navigation.navigate('Calendar'),
+      icon: 'calendar',
     },
     {
-      title: "Perfil",
-      onPress: () => navigation.navigate("Profile"),
-      icon: "account",
+      title: 'Perfil',
+      onPress: () => navigation.navigate('Profile'),
+      icon: 'account',
     },
     {
-      title: "Cerrar Sesión",
+      title: 'Cerrar Sesión',
       onPress: onLogout,
-      icon: "logout",
-      iconColor: "red",
+      icon: 'logout',
+      iconColor: 'red',
     },
-  ];
+  ]
 
   return (
     <DrawerContentScrollView>
       {menuItems.map((item, i) => (
         <ListItem key={i} bottomDivider onPress={item.onPress}>
-          <Icon
-            name={item.icon}
-            type="material-community"
-            color={item.iconColor}
-          />
+          <Icon name={item.icon} type="material-community" color={item.iconColor} />
           <ListItem.Content>
             <ListItem.Title>{item.title}</ListItem.Title>
           </ListItem.Content>
@@ -94,5 +84,5 @@ const DrawerContent = ({ navigation }: DrawerContentComponentProps) => {
         </ListItem>
       ))}
     </DrawerContentScrollView>
-  );
-};
+  )
+}
