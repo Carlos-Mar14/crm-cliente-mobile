@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { BottomNavigation, Text } from 'react-native-paper'
-import { CustomerCard } from './CustomerCard'
-import { SupplyPointList } from './supply_point/SupplyPointList'
+import { BottomNavigation } from 'react-native-paper'
 import Comments from './ComponentComments'
 import ComponentDocuments from './ComponentDocuments'
+import { CustomerCard } from './CustomerCard'
+import { SupplyPointList } from './supply_point/SupplyPointList'
 
 export default function CustomerCardScreen({ route, navigation }) {
   const { customerId } = route.params
@@ -48,9 +48,6 @@ export default function CustomerCardScreen({ route, navigation }) {
     doc: () => <ComponentDocuments customerId={customerId} />,
   })
 
-  if (!customerId) {
-    return <Text>Cargando...</Text>
-  }
   return (
     <BottomNavigation
       navigationState={{ index, routes }}

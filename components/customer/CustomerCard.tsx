@@ -1,6 +1,7 @@
 import { Picker } from '@react-native-picker/picker'
 import React from 'react'
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ProgressLoading } from '../ProgressLoading'
 import { PhoneNumber } from './PhoneNumber'
 import { useCustomer } from './hooks/customer'
 
@@ -17,7 +18,7 @@ export const CustomerCard = ({ customerId }) => {
   }
 
   if (!customer) {
-    return <Text>Cargando...</Text>
+    return <ProgressLoading />
   }
 
   return (
@@ -145,7 +146,7 @@ export const CustomerCard = ({ customerId }) => {
 
       <View>
         <Text style={{ fontWeight: 'bold' }}>Observaciones</Text>
-        <TextInput placeholder="Observaciones..."></TextInput>
+        <TextInput placeholder="Observaciones..." />
       </View>
     </View>
   )

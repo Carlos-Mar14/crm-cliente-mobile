@@ -5,6 +5,7 @@ import { Button, HelperText, TextInput } from 'react-native-paper'
 import logo from '../../assets/wide_logo.png'
 import { validateEmail } from '../../utils/helpers'
 import { useAuth } from '../AuthContext'
+import { ProgressLoading } from '../ProgressLoading'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
@@ -13,6 +14,8 @@ export default function LoginForm() {
   const [errorEmail, setErrorEmail] = useState('')
   const [errorPassword, setErrorPassword] = useState('')
   const { loading, login } = useAuth()
+
+  if (loading) return <ProgressLoading />
 
   const onLogin = async () => {
     setErrorEmail('')
