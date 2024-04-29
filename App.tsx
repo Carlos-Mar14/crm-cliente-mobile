@@ -4,14 +4,17 @@ import 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import AuthProvider from './components/AuthContext'
 import { DrawerNavigation } from './navigations/DrawerNavigation'
+import { ServicesProvider } from './utils/api'
 
 export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <AuthProvider>
-          <DrawerNavigation />
-        </AuthProvider>
+        <ServicesProvider>
+          <AuthProvider>
+            <DrawerNavigation />
+          </AuthProvider>
+        </ServicesProvider>
       </NavigationContainer>
     </SafeAreaProvider>
   )

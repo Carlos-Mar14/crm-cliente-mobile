@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { api, getToken, refreshToken, removeToken, saveToken } from '../utils/api'
+import { useServices } from '../utils/api'
 
 interface LoginData {
   email: string
@@ -16,16 +16,22 @@ const AuthContext = createContext({
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { apiService, tokenService } = useServices()
 
   useEffect(() => {
+    const checkAuth = async () => {
+      setLoading(true)
+      const isLoggedIn = await apiService.checkLogin()
+      setIsLoggedIn(isLoggedIn)
+      setLoading(false)
+    }
     checkAuth()
-  }, [])
+  }, [apiService]) // todo: check if this is needed
 
   const login = async (loginData: LoginData) => {
     setLoading(true)
     try {
-      const response = await api.post('/token-auth/', loginData)
-      await saveToken(response.data.token)
+      await apiService.login(loginData)
       setIsLoggedIn(true)
     } finally {
       setLoading(false)
@@ -33,28 +39,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const logout = async () => {
-    await removeToken()
+    await tokenService.removeToken()
     setIsLoggedIn(false)
-  }
-
-  const checkAuth = async () => {
-    setLoading(true)
-    const token = await getToken()
-    if (token) {
-      try {
-        await refreshToken(token)
-        setIsLoggedIn(true)
-      } catch (e) {
-        console.debug(e)
-        setIsLoggedIn(false)
-        await removeToken()
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      setIsLoggedIn(false)
-      setLoading(false)
-    }
   }
 
   return (
