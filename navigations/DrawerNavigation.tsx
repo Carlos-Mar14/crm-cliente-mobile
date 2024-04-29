@@ -7,11 +7,11 @@ import React, { useState } from 'react'
 import { Alert } from 'react-native'
 import { useAuth } from '../components/AuthContext'
 
-import { Icon, ListItem, Text } from '@rneui/themed'
+import { Icon, ListItem } from '@rneui/themed'
+import LoginForm from '../components/account/LoginForm'
 import CustomerCardScreen from '../components/customer/CustomerCardScreen'
 import { CalendarScreen } from '../screens/CalendarScreen'
 import { ProfileScreen } from '../screens/ProfileScreen'
-import LoginForm from '../components/account/LoginForm'
 
 export type RootDrawerParams = {
   Profile: undefined
@@ -23,8 +23,7 @@ const Drawer = createDrawerNavigator<RootDrawerParams>()
 
 export const DrawerNavigation = () => {
   const [fichaTitle, setFichaTitle] = useState('Ficha')
-  const { isLoggedIn, loading } = useAuth()
-  if (loading) return <Text>Cargando...</Text>
+  const { isLoggedIn } = useAuth()
   if (!isLoggedIn) return <LoginForm />
 
   return (

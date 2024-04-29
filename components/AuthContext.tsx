@@ -1,16 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
-import {
-  api,
-  getToken,
-  refreshToken,
-  removeToken,
-  saveToken,
-} from "../utils/api";
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { api, getToken, refreshToken, removeToken, saveToken } from '../utils/api'
 
 interface LoginData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 const AuthContext = createContext({
@@ -18,67 +11,61 @@ const AuthContext = createContext({
   loading: true,
   login: (data: LoginData) => {},
   logout: () => {},
-});
+})
 
-const AuthProvider = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [loading, setLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    checkAuth()
+  }, [])
 
   const login = async (loginData: LoginData) => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const response = await api.post("/token-auth/", loginData);
-      await saveToken(response.data.token);
-      setIsLoggedIn(true);
-    } catch (error) {
-      if (error?.response?.data) {
-        Alert.alert("Error", String(error?.response?.data));
-      } else {
-        Alert.alert("Error", 'Error de la red');
-      }
-      console.error(error)
+      const response = await api.post('/token-auth/', loginData)
+      await saveToken(response.data.token)
+      setIsLoggedIn(true)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const logout = async () => {
-    await removeToken();
-    setIsLoggedIn(false);
-  };
+    await removeToken()
+    setIsLoggedIn(false)
+  }
 
   const checkAuth = async () => {
-    setLoading(true);
-    const token = await getToken();
+    setLoading(true)
+    const token = await getToken()
     if (token) {
       try {
-        await refreshToken(token);
-        setIsLoggedIn(true);
-      } catch (error) {
-        setIsLoggedIn(false);
-        await removeToken();
+        await refreshToken(token)
+        setIsLoggedIn(true)
+      } catch (e) {
+        console.debug(e)
+        setIsLoggedIn(false)
+        await removeToken()
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     } else {
-      setIsLoggedIn(false);
-      setLoading(false);
+      setIsLoggedIn(false)
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <AuthContext.Provider value={{ loading, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
-export default AuthProvider;
+export default AuthProvider
 
 export const useAuth = () => {
-  return useContext(AuthContext);
-};
+  return useContext(AuthContext)
+}
