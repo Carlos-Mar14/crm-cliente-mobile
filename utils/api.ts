@@ -1,84 +1,81 @@
-import { API_URL_SERVER, MODE } from '@env';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { API_URL_SERVER, MODE } from '@env'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
 const api = axios.create({
   baseURL: API_URL_SERVER,
-});
+})
 
 api.interceptors.request.use(
   // log all requests
   (config) => {
-    console.log(config);
-    return config;
+    console.log({ url: config.url, body: config.data, params: config.params })
+    return config
   },
   (error) => {
-    console.error(error);
-    return Promise.reject(error);
-  }
+    console.error(error)
+    return Promise.reject(error)
+  },
 )
 
-
-if (MODE === 'offline') {  
+if (MODE === 'offline') {
   api.post = (args) => {
     console.log(args)
-    return new Promise((resolve) => resolve({ data: { token: "testtoken" } }));
-  };
+    return new Promise((resolve) => resolve({ data: { token: 'testtoken' } }))
+  }
 
   api.get = (url) => {
-    if (url === '/agent_agenda/agenda/' ) {
-      return new Promise((resolve) => resolve({ data: require('../agenda_events.json') }));
+    if (url === '/agent_agenda/agenda/') {
+      return new Promise((resolve) => resolve({ data: require('../agenda_events.json') }))
     }
     console.log(url)
-    if (url === '/puntos/'){
-      return new Promise((resolve) => resolve({ data: require('../puntos.json') }));
+    if (url === '/puntos/') {
+      return new Promise((resolve) => resolve({ data: require('../puntos.json') }))
     }
 
-    if (url === '/ficha/'){
-      return new Promise((resolve) => resolve({ data: require('../ficha.json') }));
+    if (url === '/ficha/') {
+      return new Promise((resolve) => resolve({ data: require('../ficha.json') }))
     }
 
-    return new Promise((resolve) => resolve({ data: { } }));
+    return new Promise((resolve) => resolve({ data: {} }))
   }
 }
 
-const TOKEN_KEY = "token";
-
+const TOKEN_KEY = 'token'
 
 async function saveToken(token: string) {
-  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  api.defaults.headers.common.Authorization = `Bearer ${token}`
 
-  if (Platform.OS === "web") {
-    await AsyncStorage.setItem(TOKEN_KEY, token);
+  if (Platform.OS === 'web') {
+    await AsyncStorage.setItem(TOKEN_KEY, token)
   } else {
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
+    await SecureStore.setItemAsync(TOKEN_KEY, token)
   }
 }
 
 async function getToken() {
-  if (Platform.OS === "web") {
-    return await AsyncStorage.getItem(TOKEN_KEY);
+  if (Platform.OS === 'web') {
+    return await AsyncStorage.getItem(TOKEN_KEY)
   } else {
-    return await SecureStore.getItemAsync(TOKEN_KEY);
+    return await SecureStore.getItemAsync(TOKEN_KEY)
   }
 }
 
 async function removeToken() {
-  delete api.defaults.headers.common.Authorization;
+  delete api.defaults.headers.common.Authorization
 
-  if (Platform.OS === "web") {
-    await AsyncStorage.removeItem(TOKEN_KEY);
+  if (Platform.OS === 'web') {
+    await AsyncStorage.removeItem(TOKEN_KEY)
   } else {
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(TOKEN_KEY)
   }
 }
 
 async function refreshToken(token: string) {
-    const {data} =  await api.post("/token-refresh/", { token });
-    await saveToken(data.token);
+  const { data } = await api.post('/token-refresh/', { token })
+  await saveToken(data.token)
 }
 
-export { api, getToken, refreshToken, removeToken, saveToken };
-
+export { api, getToken, refreshToken, removeToken, saveToken }
