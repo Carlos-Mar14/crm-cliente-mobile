@@ -1,136 +1,121 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View, BackHandler } from "react-native";
-import {
-  Calendar,
-  CalendarProvider,
-  LocaleConfig,
-} from "react-native-calendars";
-import { CustomDayComponent } from "../components/calendar/CustomDayComponent";
-import Toolbar from "../components/common/Toolbar";
-import { api } from "../utils/api";
-import { AgendaView } from "./AgendaView";
-import { subDays, addDays, format, parseISO } from "date-fns";
+import React, { useCallback, useEffect, useState } from 'react'
+import { StyleSheet, View, BackHandler } from 'react-native'
+import { Calendar, CalendarProvider, LocaleConfig } from 'react-native-calendars'
+import { CustomDayComponent } from '../components/calendar/CustomDayComponent'
+import Toolbar from '../components/common/Toolbar'
+import { api } from '../utils/api'
+import { AgendaView } from './AgendaView'
+import { subDays, addDays, format, parseISO } from 'date-fns'
 const dateFromIso = (ds: Date | string): string =>
-  (ds instanceof Date ? ds.toISOString() : ds).split("T")[0];
+  (ds instanceof Date ? ds.toISOString() : ds).split('T')[0]
 
 export interface ApiEvent {
-  name: string;
-  start: string;
-  end: string;
-  type: string;
-  card_id: Number;
-  status: string;
-  color: string;
-  human_type: string;
-  comment?: string;
-  event_id?: number;
-  contract_id?: number;
+  name: string
+  start: string
+  end: string
+  type: string
+  card_id: number
+  status: string
+  color: string
+  human_type: string
+  comment?: string
+  event_id?: number
+  contract_id?: number
 }
 
 export const CalendarScreen = () => {
-  const [showAgenda, setShowAgenda] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dateFromIso(new Date()));
-  const [events, setEvents] = useState<{ [dateString: string]: ApiEvent[] }>(
-    {}
-  );
+  const [showAgenda, setShowAgenda] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(dateFromIso(new Date()))
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
+  const [events, setEvents] = useState<{ [dateString: string]: ApiEvent[] }>({})
+
+  // TODO only rerender on MONTH change, not on date change
+  useEffect(() => {
+    const newMonth = parseISO(selectedDate).getMonth() + 1
+    console.log('Actualizando currentMonth con selectedDate:', selectedDate, 'Nuevo mes:', newMonth)
+
+    setCurrentMonth(newMonth)
+  }, [selectedDate])
 
   useEffect(() => {
-    getItems();
-  }, []);
+    console.log('Cargando eventos para el mes:', currentMonth)
+    const getItems = async () => {
+      const month = parseISO(selectedDate).getMonth() + 1
+      const year = parseISO(selectedDate).getFullYear()
+      const { data }: { data: ApiEvent[] } = await api.get('/agent_agenda/agenda/', {
+        params: { month, year },
+      })
+      const agendaEvents = apiEventsToAgendaEvents(data)
+      setEvents(agendaEvents)
+    }
+    getItems()
+  }, [currentMonth])
 
-  const apiEventsToAgendaEvents = (
-    apiEvents: ApiEvent[]
-  ): { [dateString: string]: ApiEvent[] } => {
+  const apiEventsToAgendaEvents = (apiEvents: ApiEvent[]): { [dateString: string]: ApiEvent[] } => {
     return apiEvents.reduce((accumulator, event) => {
-      const dateString = dateFromIso(event.start);
+      const dateString = dateFromIso(event.start)
       if (accumulator[dateString]) {
-        accumulator[dateString].push(event);
+        accumulator[dateString].push(event)
       } else {
-        accumulator[dateString] = [event];
+        accumulator[dateString] = [event]
       }
-      return accumulator;
-    }, {});
-  };
-
-  async function getItems() {
-    const month = parseISO(selectedDate).getMonth() + 1;
-    const year = parseISO(selectedDate).getFullYear();
-    const { data }: { data: ApiEvent[] } = await api.get(
-      "/agent_agenda/agenda/",
-      { params: { month, year } }
-    );
-    const agendaEvents = apiEventsToAgendaEvents(data);
-    setEvents(agendaEvents);
+      return accumulator
+    }, {})
   }
+
+  const handleMonthChang = (newMonth: any) => {
+    if (newMonth) {
+      setSelectedDate(newMonth)
+      console.log('nuevo mes', newMonth)
+    } else {
+      console.error('Nuevo mes no válido:', newMonth)
+    }
+  }
+
   const onDayPress = useCallback(
     (dateString) => {
-      setSelectedDate(dateString);
-      if (!showAgenda && events[dateString]) setShowAgenda(true);
+      setSelectedDate(dateString)
+      if (!showAgenda && events[dateString]) setShowAgenda(true)
     },
-    [showAgenda, events]
-  );
+    [showAgenda, events],
+  )
 
-  LocaleConfig.locales["es"] = {
+  LocaleConfig.locales['es'] = {
     monthNames: [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ],
     monthNamesShort: [
-      "Ene",
-      "Feb",
-      "Mar",
-      "Abr",
-      "May",
-      "Jun",
-      "Jul",
-      "Ago",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dic",
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ],
-    dayNames: [
-      "Domingo",
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-    ],
-    dayNamesShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
-    today: "Hoy",
-  };
-  LocaleConfig.defaultLocale = "es";
+    dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+    dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+    today: 'Hoy',
+  }
+  LocaleConfig.defaultLocale = 'es'
 
-  const isToday = (dateString: string) =>
-    dateString === dateFromIso(new Date());
-
-  useEffect(() => {
-    const returnMonth = () => {
-      if (showAgenda) {
-        setShowAgenda(false);
-        return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      returnMonth
-    );
-    return () => backHandler.remove();
-  }),
-    [showAgenda];
+  const isToday = (dateString: string) => dateString === dateFromIso(new Date())
 
   return (
     <View style={styles.container}>
@@ -139,52 +124,55 @@ export const CalendarScreen = () => {
         rightButtons={[
           // TODO: add icons for buttons
           {
-            title: "Día anterior",
+            title: 'Día anterior',
             style: {
-              backgroundColor: "lightblue",
+              backgroundColor: 'lightblue',
             },
             onPress: () => {
-              const currentDate = new Date(selectedDate);
-              const dayBefore = subDays(currentDate, 1);
-              const dayBeforeString = format(dayBefore, "yyyy-MM-dd");
-              setSelectedDate(dayBeforeString);
+              const currentDate = new Date(selectedDate)
+              const dayBefore = subDays(currentDate, 1)
+              const dayBeforeString = format(dayBefore, 'yyyy-MM-dd')
+              setSelectedDate(dayBeforeString)
             },
           },
           {
-            title: "Hoy",
+            title: 'Hoy',
             style: {
-              backgroundColor: "lightblue",
+              backgroundColor: 'lightblue',
             },
             onPress: () => {
-              const currentDate = new Date();
-              const today = currentDate;
-              const todayString = format(today, "yyyy-MM-dd");
-              setSelectedDate(todayString);
+              const currentDate = new Date()
+              const today = currentDate
+              const todayString = format(today, 'yyyy-MM-dd')
+              setSelectedDate(todayString)
             },
           },
           {
-            title: "Día siguiente",
+            title: 'Día siguiente',
             style: {
-              backgroundColor: "lightblue",
+              backgroundColor: 'lightblue',
             },
             onPress: () => {
-              const currentDate = new Date(selectedDate);
+              const currentDate = new Date(selectedDate)
               // const dyaAfter = addDays(currentDate, 1)
               // const dayAfterString = format(dyaAfter, "yyyy-MM-dd")
               // setSelectedDate(dayAfterString)
 
-              setSelectedDate(format(addDays(currentDate, 1), "yyyy-MM-dd"));
+              setSelectedDate(format(addDays(currentDate, 1), 'yyyy-MM-dd'))
             },
           },
         ]}
       />
 
-      <CalendarProvider date={selectedDate} onDateChanged={setSelectedDate}>
+      <CalendarProvider
+        date={selectedDate}
+        onMonthChange={handleMonthChang}
+        onDateChanged={setSelectedDate}>
         {showAgenda ? (
           <AgendaView title={selectedDate} events={events[selectedDate]} />
         ) : (
           <Calendar
-            current={selectedDate}
+            current={selectedDate.toString().split('T')[0]}
             dayComponent={({ date }) => (
               <CustomDayComponent
                 day={date.day}
@@ -198,104 +186,104 @@ export const CalendarScreen = () => {
         )}
       </CalendarProvider>
     </View>
-  );
-};
+  )
+}
 
 // TODO: limpiar
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: '#F0F0F0',
     marginTop: 20,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     marginHorizontal: 10,
     marginTop: 30,
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginRight: 10,
   },
   dayContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
     height: 60,
   },
   dateContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     //alignItems: 'center',
     height: 20,
   },
   dateButton: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 8,
-    backgroundColor: "red",
+    backgroundColor: 'red',
     borderRadius: 5,
     padding: 10,
   },
   dayText: {
     fontSize: 13,
     lineHeight: 23,
-    textAlign: "center",
+    textAlign: 'center',
   },
   eventTitle: {
     fontSize: 13,
-    color: "black",
-    fontWeight: "bold",
-    textAlign: "center",
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginTop: 0,
   },
   eventContainer: {
     marginTop: 10,
-    flexDirection: "column",
-    alignItems: "center",
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   todayText: {
-    fontWeight: "bold",
-    color: "red",
+    fontWeight: 'bold',
+    color: 'red',
   },
   selectedDay: {
-    backgroundColor: "#e5e5e5",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#e5e5e5',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 15,
     borderRadius: 5,
     height: 50,
   },
   eventDay: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 15,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     height: 50,
   },
   defaultDay: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 0,
     height: 20,
   },
   eventsContainer: {
     padding: 30,
     borderTopWidth: 1,
-    borderTopColor: "#ccc",
+    borderTopColor: '#ccc',
   },
   eventsTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   eventText: {
     fontSize: 14,
     marginBottom: 5,
   },
-});
+})
