@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import React, { useCallback } from 'react'
 import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { AgendaList } from 'react-native-calendars'
-import { ApiEvent } from './CalendarScreen'
+import { ApiEvent } from './types'
 
 const _AgendaItem = ({ event }: { event: ApiEvent }) => {
   const { name, start } = event
@@ -10,7 +10,7 @@ const _AgendaItem = ({ event }: { event: ApiEvent }) => {
   const navigation = useNavigation()
 
   const openCustomerCard = () => {
-    navigation.navigate('Ficha', { customerId: event.card_id })
+    navigation.navigate('CustomerCard', { customerId: event.card_id })
   }
 
   return (
