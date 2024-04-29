@@ -3,7 +3,7 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer'
-import React, { useState } from 'react'
+import React from 'react'
 import { Alert } from 'react-native'
 import { useAuth } from '../components/AuthContext'
 
@@ -16,13 +16,12 @@ import { ProfileScreen } from '../screens/ProfileScreen'
 export type RootDrawerParams = {
   Profile: undefined
   Calendar: undefined
-  Ficha: undefined
+  CustomerCard: undefined
 }
 
 const Drawer = createDrawerNavigator<RootDrawerParams>()
 
 export const DrawerNavigation = () => {
-  const [fichaTitle, setFichaTitle] = useState('Ficha')
   const { isLoggedIn } = useAuth()
   if (!isLoggedIn) return <LoginForm />
 
@@ -30,7 +29,7 @@ export const DrawerNavigation = () => {
     <Drawer.Navigator screenOptions={{ headerShown: isLoggedIn }} drawerContent={DrawerContent}>
       <Drawer.Screen name="Calendar" component={CalendarScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
-      <Drawer.Screen name="Ficha" component={CustomerCardScreen} options={{ title: fichaTitle }} />
+      <Drawer.Screen name="CustomerCard" component={CustomerCardScreen} />
     </Drawer.Navigator>
   )
 }
